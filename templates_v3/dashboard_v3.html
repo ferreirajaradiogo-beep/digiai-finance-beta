@@ -1,0 +1,299 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+{% set report_colors = ['#1f6bff', '#45b8ff', '#39c98a', '#ff7f6a', '#f6c350'] %}
+{% set period_label = filtros.data_inicial ~ (' a ' ~ filtros.data_final if filtros.data_final else '') if filtros.data_inicial else texts.period_summary %}
+
+<section class="dashboard-hero">
+    <div class="dashboard-hero-copy">
+        <span class="eyebrow">{{ texts.dashboard }}</span>
+        <h2>{{ texts.welcome }}, {{ session["user"] }} 👋</h2>
+        <p>{{ texts.summary }}</p>
+    </div>
+    <div class="dashboard-hero-side">
+        <button id="install-cta" class="topbar-chip primary" hidden>{{ texts.install_app }}</button>
+        <a class="topbar-chip" href="{{ url_for('assistente_financeiro') }}">{{ texts.assistant_nav }}</a>
+    </div>
+</section>
+
+<section class="dashboard-layout">
+    <div class="dashboard-main">
+        <article class="balance-hero-card">
+            <div class="balance-hero-head">
+                <div>
+                    <span class="eyebrow light">Saldo total</span>
+                    <p>{{ period_label }}</p>
+                </div>
+                <span class="status-dot">●</span>
+            </div>
+
+            <div class="balance-hero-amount">{{ format_money(saldo) }}</div>
+            <p class="balance-hero-caption">{{ texts.period_summary }}</p>
+
+            <div class="balance-mini-grid">
+                <div class="mini-finance-card positive">
+                    <span>{{ texts.income }}</span>
+                    <strong>{{ format_money(receita) }}</strong>
+                </div>
+                <div class="mini-finance-card negative">
+                    <span>{{ texts.expense }}</span>
+                    <strong>{{ format_money(despesa) }}</strong>
+                </div>
+            </div>
+
+            <div class="balance-actions">
+                <a class="bank-primary-button" href="#novo-lancamento">+ {{ texts.new_transaction }}</a>
+                <a class="bank-secondary-button" href="{{ url_for('exportar_pdf', data_inicial=filtros.data_inicial, data_final=filtros.data_final) }}">{{ texts.export_pdf }}</a>
+                <a class="bank-secondary-button" href="{{ url_for('backup_download') }}">{{ texts.download_backup }}</a>
+            </div>
+        </article>
+
+        <section class="overview-strip">
+            <article class="overview-card">
+                <span>{{ texts.total_registered }}</span>
+                <strong>{{ insights.entries_count }}</strong>
+                <small>{{ texts.transactions }}</small>
+            </article>
+            <article class="overview-card">
+                <span>{{ texts.top_category }}</span>
+                <strong>{{ insights.top_category }}</strong>
+                <small>{{ texts.category_chart }}</small>
+            </article>
+            <article class="overview-card">
+                <span>{{ texts.latest_date }}</span>
+                <strong>{{ insights.latest_date }}</strong>
+                <small>{{ texts.date }}</small>
+            </article>
+            <article class="overview-card">
+                <span>{{ texts.active_currency }}</span>
+                <strong>{{ insights.active_currency }}</strong>
+                <small>{{ texts.currency }}</small>
+            </article>
+        </section>
+
+        <article class="bank-card filter-card">
+            <div class="card-header">
+                <div>
+                    <span class="eyebrow">{{ texts.apply_filters }}</span>
+                    <h3>Filtro financeiro</h3>
+                </div>
+            </div>
+
+            <form method="GET" class="bank-form-row">
+                <label>
+                    <span>{{ texts.date_from }}</span>
+                    <input type="date" name="data_inicial" value="{{ filtros.data_inicial }}">
+                </label>
+                <label>
+                    <span>{{ texts.date_to }}</span>
+                    <input type="date" name="data_final" value="{{ filtros.data_final }}">
+                </label>
+                <button type="submit" class="bank-primary-button">{{ texts.apply_filters }}</button>
+                <a href="{{ url_for('index') }}" class="bank-text-link">{{ texts.clear_filters }}</a>
+            </form>
+        </article>
+
+        <article class="bank-card chart-section-card" id="relatorios">
+            <div class="card-header">
+                <div>
+                    <span class="eyebrow">{{ texts.reports_title }}</span>
+                    <h3>{{ texts.reports_title }}</h3>
+                </div>
+                <div class="segmented-pills">
+                    <span class="seg-pill active">{{ texts.category_chart }}</span>
+                    <span class="seg-pill">{{ texts.monthly_chart }}</span>
+                    <span class="seg-pill">{{ texts.monthly_comparison }}</span>
+                </div>
+            </div>
+
+            {% if plan_key == 'pro' and advanced_reports.has_data %}
+            <div class="reports-bento">
+                {% if advanced_reports.category_series %}
+                {% set donut = namespace(offset=0) %}
+                <div class="donut-card">
+                    <div class="bank-donut" style="background: conic-gradient({% for item in advanced_reports.category_series %}{% set start = donut.offset %}{% set donut.offset = donut.offset + item.pct %}{{ report_colors[loop.index0 % (report_colors|length)] }} {{ start }}% {{ donut.offset }}%{% if not loop.last %}, {% endif %}{% endfor %});">
+                        <div class="bank-donut-center">
+                            <span>Total</span>
+                            <strong>{{ format_money(advanced_reports.comparison.expense_total) }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="legend-stack">
+                        {% for item in advanced_reports.category_series %}
+                        <div class="legend-line">
+                            <div class="legend-left">
+                                <span class="legend-dot" style="background: {{ report_colors[loop.index0 % (report_colors|length)] }}"></span>
+                                <div>
+                                    <strong>{{ item.label }}</strong>
+                                    <small>{{ format_money(item.value) }}</small>
+                                </div>
+                            </div>
+                            <span>{{ item.pct }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="report-summary-card bank-side-summary">
+                    <div class="summary-line">
+                        <span>{{ texts.income }}</span>
+                        <strong class="positive">{{ format_money(advanced_reports.comparison.income_total) }}</strong>
+                    </div>
+                    <div class="summary-line">
+                        <span>{{ texts.expense }}</span>
+                        <strong class="negative">{{ format_money(advanced_reports.comparison.expense_total) }}</strong>
+                    </div>
+                    <div class="summary-line">
+                        <span>{{ texts.balance }}</span>
+                        <strong>{{ format_money(advanced_reports.comparison.balance_total) }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modern-bars-card">
+                <div class="bars-head">
+                    <strong>{{ texts.monthly_chart }}</strong>
+                    <span>{{ texts.period_summary }}</span>
+                </div>
+                <div class="modern-bars">
+                    {% for item in advanced_reports.monthly_series %}
+                    <div class="modern-bar-column">
+                        <div class="modern-bar-track">
+                            <div class="modern-bar-fill expense" style="height: {{ [item.expense_pct, 10]|max }}%"></div>
+                        </div>
+                        <span>{{ item.label }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="locked-state-card">
+                <strong>{{ texts.reports_subtitle }}</strong>
+                <p>{{ texts.advanced_reports_locked if plan_key != 'pro' else texts.no_report_data }}</p>
+                <a class="bank-primary-button small" href="{{ url_for('planos') }}">{{ texts.plans }}</a>
+            </div>
+            {% endif %}
+        </article>
+
+        <article class="bank-card transactions-shell">
+            <div class="card-header">
+                <div>
+                    <span class="eyebrow">{{ texts.transactions }}</span>
+                    <h3>{{ texts.transactions }}</h3>
+                </div>
+                <span class="soft-badge">{{ insights.entries_count }}</span>
+            </div>
+
+            {% if dados %}
+            <div class="transaction-feed-modern">
+                {% for dado in dados %}
+                <article class="transaction-card-modern">
+                    <div class="transaction-card-left">
+                        <span class="transaction-bullet {{ dado['tipo'] }}">{{ '+' if dado['tipo'] == 'receita' else '-' }}</span>
+                        <div>
+                            <strong>{{ dado["descricao"] }}</strong>
+                            <small>{{ dado["conta_nome"] or '-' }} · {{ dado["categoria_nome"] or '-' }} · {{ dado["data"] or '-' }}</small>
+                        </div>
+                    </div>
+                    <div class="transaction-card-right">
+                        <span class="transaction-value-modern {% if dado['tipo'] == 'receita' %}positive{% else %}negative{% endif %}">
+                            {{ format_money(dado["valor"]) }}
+                        </span>
+                        <div class="transaction-actions-modern">
+                            <a href="{{ url_for('editar', item_id=dado['id']) }}">{{ texts.edit }}</a>
+                            <form method="POST" action="{{ url_for('delete', item_id=dado['id']) }}" onsubmit="return confirm('{{ texts.delete_confirm }}');">
+                                <button type="submit">{{ texts.delete }}</button>
+                            </form>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state-bank">
+                <strong>{{ texts.none_transactions }}</strong>
+                <p>{{ texts.new_transaction }}</p>
+            </div>
+            {% endif %}
+        </article>
+    </div>
+
+    <div class="dashboard-side">
+        <article class="bank-card launch-card" id="novo-lancamento">
+            <div class="card-header">
+                <div>
+                    <span class="eyebrow">{{ texts.new_transaction }}</span>
+                    <h3>{{ texts.new_transaction }}</h3>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('add') }}" class="mobile-bank-form">
+                <div class="type-switch">
+                    <label class="type-chip income">
+                        <input type="radio" name="tipo" value="receita">
+                        <span>{{ texts.income }}</span>
+                    </label>
+                    <label class="type-chip expense">
+                        <input type="radio" name="tipo" value="despesa" checked>
+                        <span>{{ texts.expense }}</span>
+                    </label>
+                </div>
+
+                <label>
+                    <span>{{ texts.description }}</span>
+                    <input type="text" name="descricao" placeholder="Ex: Supermercado" required>
+                </label>
+                <label>
+                    <span>{{ texts.amount }}</span>
+                    <input type="text" name="valor" placeholder="R$ 0,00" required>
+                </label>
+                <label>
+                    <span>{{ texts.date }}</span>
+                    <input type="date" name="data">
+                </label>
+                <label>
+                    <span>{{ texts.account }}</span>
+                    <select name="conta_id">
+                        <option value="">-</option>
+                        {% for conta in contas %}
+                        <option value="{{ conta['id'] }}">{{ conta['nome'] }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    <span>{{ texts.category }}</span>
+                    <select name="categoria_id">
+                        <option value="">-</option>
+                        {% for categoria in categorias %}
+                        <option value="{{ categoria['id'] }}">{{ categoria['nome'] }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <button type="submit" class="bank-primary-button full">{{ texts.save }}</button>
+            </form>
+        </article>
+
+        {% if alerts.enabled and alerts.triggered %}
+        <article class="bank-card alert-side-card">
+            <span class="eyebrow">{{ texts.alerts_title }}</span>
+            <h3>{{ texts.overspending_alert }}</h3>
+            <p>{{ format_money(alerts.expense_total) }} / {{ format_money(alerts.threshold) }}</p>
+        </article>
+        {% endif %}
+
+        <article class="bank-card assistant-preview-bank">
+            <div class="card-header">
+                <div>
+                    <span class="eyebrow">{{ texts.assistant_title }}</span>
+                    <h3>{{ assistant_preview.summary }}</h3>
+                </div>
+                <span class="soft-badge">{{ assistant_preview.snapshot.status.label }}</span>
+            </div>
+            <p>{{ assistant_preview.financial_alert }}</p>
+            <a class="bank-secondary-button full" href="{{ url_for('assistente_financeiro') }}">{{ texts.assistant_cta }}</a>
+        </article>
+    </div>
+</section>
+{% endblock %}

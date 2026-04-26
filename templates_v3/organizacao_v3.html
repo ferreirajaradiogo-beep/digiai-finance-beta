@@ -1,0 +1,143 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+{% set palette = paid_color_presets if plan_key == 'pro' else free_allowed_colors %}
+
+<section class="page-hero-inline">
+    <div>
+        <span class="eyebrow">{{ texts.management }}</span>
+        <h2>{{ texts.management }}</h2>
+        <p>{{ texts.manage_help }}</p>
+    </div>
+</section>
+
+<section class="management-layout-modern">
+    <article class="bank-card management-column-card">
+        <div class="card-header">
+            <div>
+                <span class="eyebrow">{{ texts.accounts }}</span>
+                <h3>{{ texts.accounts }}</h3>
+            </div>
+            <span class="soft-badge">{{ contas|length }}</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('criar_conta') }}" class="mobile-bank-form compact">
+            <label>
+                <span>{{ texts.name }}</span>
+                <input type="text" name="nome" placeholder="{{ texts.add_account }}" required>
+            </label>
+            <label>
+                <span>{{ texts.account_type }}</span>
+                <select name="tipo">
+                    {% for value, label in account_type_options %}
+                    <option value="{{ value }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="bank-primary-button full">+ {{ texts.new_account }}</button>
+        </form>
+
+        {% if plan_key == 'free' %}
+        <p class="section-helper">{{ texts.free_account_hint }}</p>
+        {% endif %}
+
+        <div class="stacked-list-modern">
+            {% for conta in contas %}
+            <article class="list-card-row">
+                <div class="list-card-identity">
+                    <div class="list-card-icon bank">🏦</div>
+                    <div>
+                        <strong>{{ conta['nome'] }}</strong>
+                        <small>{{ conta['tipo'] }}</small>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('editar_conta', conta_id=conta['id']) }}" class="row-edit-form">
+                    <input type="text" name="nome" value="{{ conta['nome'] }}" required>
+                    <select name="tipo">
+                        {% for value, label in account_type_options %}
+                        <option value="{{ value }}" {% if conta['tipo'] == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="bank-secondary-button small">{{ texts.save_changes }}</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('excluir_conta', conta_id=conta['id']) }}">
+                    <button type="submit" class="bank-text-danger">{{ texts.delete_item }}</button>
+                </form>
+            </article>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="bank-card management-column-card">
+        <div class="card-header">
+            <div>
+                <span class="eyebrow">{{ texts.categories }}</span>
+                <h3>{{ texts.categories }}</h3>
+            </div>
+            <span class="soft-badge">{{ categorias|length }}</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('criar_categoria') }}" class="mobile-bank-form compact">
+            <label>
+                <span>{{ texts.name }}</span>
+                <input type="text" name="nome" placeholder="{{ texts.add_category }}" required>
+            </label>
+
+            <div>
+                <span class="field-inline-label">{{ texts.color }}</span>
+                <div class="color-palette-bank">
+                    {% for color in palette %}
+                    <label class="color-palette-item">
+                        <input type="radio" name="cor" value="{{ color }}" {% if loop.first %}checked{% endif %}>
+                        <span class="color-palette-swatch" style="background: {{ color }}"></span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button type="submit" class="bank-primary-button full">+ {{ texts.new_category }}</button>
+        </form>
+
+        <p class="section-helper">
+            {% if plan_key == 'free' %}
+            {{ texts.limited_color_message }}
+            {% else %}
+            {{ texts.paid_colors_help }}
+            {% endif %}
+        </p>
+
+        <div class="stacked-list-modern">
+            {% for categoria in categorias %}
+            <article class="list-card-row">
+                <div class="list-card-identity">
+                    <span class="category-ring" style="background: {{ categoria['cor'] }}"></span>
+                    <div>
+                        <strong>{{ categoria['nome'] }}</strong>
+                        <small>{{ texts.category }}</small>
+                    </div>
+                </div>
+
+                <form method="POST" action="{{ url_for('editar_categoria', categoria_id=categoria['id']) }}" class="row-edit-form">
+                    <input type="text" name="nome" value="{{ categoria['nome'] }}" required>
+                    <div class="color-palette-bank compact">
+                        {% for color in palette %}
+                        <label class="color-palette-item compact">
+                            <input type="radio" name="cor" value="{{ color }}" {% if categoria['cor'] == color %}checked{% endif %}>
+                            <span class="color-palette-swatch" style="background: {{ color }}"></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="bank-secondary-button small">{{ texts.save_changes }}</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('excluir_categoria', categoria_id=categoria['id']) }}">
+                    <button type="submit" class="bank-text-danger">{{ texts.delete_item }}</button>
+                </form>
+            </article>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

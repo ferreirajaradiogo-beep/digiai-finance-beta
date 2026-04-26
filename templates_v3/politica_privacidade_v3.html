@@ -1,0 +1,46 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="legal-hero-card">
+    <span class="eyebrow">Legal</span>
+    <h2>Politica de Privacidade</h2>
+    <p>Esta politica explica, de forma objetiva, como a beta publica do {{ app_display_name }} coleta, usa e protege os dados dos usuarios durante esta fase de testes.</p>
+</section>
+
+<section class="legal-card-stack">
+    <article class="bank-card legal-card">
+        <h3>1. Quais dados sao coletados</h3>
+        <p>Podemos coletar os dados informados no cadastro, as configuracoes escolhidas dentro do sistema e os lancamentos financeiros registrados pelo usuario durante o uso da beta.</p>
+    </article>
+
+    <article class="bank-card legal-card">
+        <h3>2. Para que os dados sao usados</h3>
+        <p>Os dados sao utilizados para permitir o login, manter o funcionamento da conta, salvar informacoes online, gerar relatorios, produzir backups e melhorar o produto com base no uso real desta fase beta.</p>
+    </article>
+
+    <article class="bank-card legal-card">
+        <h3>3. Armazenamento e seguranca</h3>
+        <p>Os dados da beta podem ser armazenados em servidor online do projeto. Adotamos medidas razoaveis de seguranca, como protecao de acesso e cuidado com senhas, mas a versao beta ainda esta em validacao e pode passar por ajustes tecnicos.</p>
+    </article>
+
+    <article class="bank-card legal-card">
+        <h3>4. Compartilhamento com terceiros</h3>
+        <p>Os dados nao sao vendidos. Eles podem ser tratados apenas por servicos tecnicos necessarios para hospedagem, banco de dados, infraestrutura e operacao da plataforma beta.</p>
+    </article>
+
+    <article class="bank-card legal-card">
+        <h3>5. Direitos do usuario</h3>
+        <p>O usuario pode solicitar esclarecimentos, atualizacao de dados ou exclusao da conta beta entrando em contato pelo e-mail <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
+    </article>
+
+    <article class="bank-card legal-card">
+        <h3>6. Atualizacoes desta politica</h3>
+        <p>Como esta e uma versao beta, esta politica pode ser atualizada para refletir melhorias no produto, ajustes operacionais ou novas etapas da publicacao.</p>
+    </article>
+
+    <article class="bank-card legal-card">
+        <h3>7. Contato</h3>
+        <p>Responsavel por esta beta: {{ company_name }}. Para suporte, duvidas ou solicitacoes relacionadas a privacidade, use o e-mail <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
+    </article>
+ </section>
+{% endblock %}

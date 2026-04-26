@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: digiai-finance-beta
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 2 -b 0.0.0.0:$PORT app_pwa:app
+    envVars:
+      - key: FINANCEIRO_SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: NOTAFACIL_COOKIE_SECURE
+        value: "true"
+      - key: NOTAFACIL_URL_SCHEME
+        value: "https"
+      - key: NOTAFACIL_APP_NAME
+        value: DigiAI Finance
+      - key: NOTAFACIL_APP_TAGLINE
+        value: Controle financeiro pessoal inteligente
+      - key: NOTAFACIL_COMPANY_NAME
+        value: DigiAI
+      - key: NOTAFACIL_SUPPORT_EMAIL
+        value: digiai.oficial@gmail.com
+      - key: DATABASE_URL
+        fromDatabase:
+          name: digiai-finance-beta-db
+          property: connectionString
+
+databases:
+  - name: digiai-finance-beta-db
+    databaseName: digiaifinancebeta
+    user: digiaifinancebeta
+    plan: free

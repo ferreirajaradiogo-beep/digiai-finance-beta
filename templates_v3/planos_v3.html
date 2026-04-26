@@ -1,0 +1,37 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="page-hero-inline">
+    <div>
+        <span class="eyebrow">Beta publica</span>
+        <h2>Versao gratuita para validacao</h2>
+        <p>Esta edicao foi separada para publicar sem cobranca, com foco em testes reais, estabilidade e feedback dos primeiros usuarios.</p>
+    </div>
+</section>
+
+<section class="pricing-grid-bank pricing-grid-single">
+    <article class="pricing-card-bank featured active">
+        <div class="pricing-card-head">
+            <div>
+                <span class="eyebrow light">Plano ativo</span>
+                <h3>{{ app_display_name }} Free</h3>
+            </div>
+            <span class="pricing-value">R$ 0</span>
+        </div>
+        <p>Sem pagamento nesta fase. Ideal para publicar, validar e evoluir.</p>
+        <ul>
+            <li>20 lancamentos por mes</li>
+            <li>1 conta</li>
+            <li>10 categorias</li>
+            <li>Temas Preto, Branco e Ocean</li>
+            <li>Exportacao e backup local</li>
+            <li>Assistente financeiro</li>
+            <li>Politica e termos incluidos</li>
+        </ul>
+        <div class="beta-note-box">
+            <strong>O que fica para a versao completa</strong>
+            <p>Pagamento, plano Pro, mais temas, multimoeda avancada, alertas premium e sincronizacao mais robusta entre app, site e programa.</p>
+        </div>
+    </article>
+</section>
+{% endblock %}

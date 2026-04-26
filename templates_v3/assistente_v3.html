@@ -1,0 +1,155 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="assistant-hero-card">
+    <div class="assistant-hero-copy">
+        <p class="eyebrow">{{ texts.assistant_title }}</p>
+        <h2>{{ texts.assistant_title }}</h2>
+        <p>{{ texts.assistant_subtitle }}</p>
+    </div>
+    <div class="assistant-hero-badges">
+        <span class="assistant-badge">{{ texts.assistant_engine_local }}</span>
+        <span class="assistant-badge muted">{{ texts.assistant_engine_ready }}</span>
+    </div>
+</section>
+
+<section class="bank-card">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">{{ texts.assistant_overview }}</p>
+            <h3>{{ assistant.snapshot.period.label }}</h3>
+        </div>
+        <a class="bank-secondary-button" href="{{ assistant_api_url }}">{{ texts.assistant_open_api }}</a>
+    </div>
+    <form method="GET" class="bank-form-row">
+        <label>
+            <span>{{ texts.date_from }}</span>
+            <input type="date" name="data_inicial" value="{{ filtros.data_inicial }}">
+        </label>
+        <label>
+            <span>{{ texts.date_to }}</span>
+            <input type="date" name="data_final" value="{{ filtros.data_final }}">
+        </label>
+        <button type="submit" class="bank-primary-button">{{ texts.assistant_refresh }}</button>
+        <a href="{{ url_for('assistente_financeiro') }}" class="bank-text-link">{{ texts.assistant_current_month }}</a>
+    </form>
+</section>
+
+<section class="assistant-metrics-grid">
+    <article class="app-panel assistant-metric-card income">
+        <span>{{ texts.income }}</span>
+        <strong>{{ format_money(assistant.snapshot.totals.income) }}</strong>
+    </article>
+    <article class="app-panel assistant-metric-card expense">
+        <span>{{ texts.expense }}</span>
+        <strong>{{ format_money(assistant.snapshot.totals.expense) }}</strong>
+    </article>
+    <article class="app-panel assistant-metric-card balance">
+        <span>{{ texts.balance }}</span>
+        <strong>{{ format_money(assistant.snapshot.totals.balance) }}</strong>
+    </article>
+    <article class="app-panel assistant-metric-card focus">
+        <span>{{ texts.top_category }}</span>
+        <strong>{{ assistant.snapshot.top_expense_category.name }}</strong>
+        <small>{{ format_money(assistant.snapshot.top_expense_category.value) }}</small>
+    </article>
+</section>
+
+{% if assistant.snapshot.entries_count == 0 %}
+<section class="empty-state-bank">
+    <strong>{{ texts.assistant_no_data_title }}</strong>
+    <p>{{ texts.assistant_no_data_text }}</p>
+</section>
+{% else %}
+<section class="assistant-layout">
+    <div class="assistant-main-column">
+        <article class="assistant-story-card">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">{{ texts.assistant_summary_title }}</p>
+                    <h3>{{ assistant.summary }}</h3>
+                </div>
+                <span class="assistant-status assistant-status-{{ assistant.snapshot.status.tone }}">{{ assistant.snapshot.status.label }}</span>
+            </div>
+            <p class="assistant-generated-text">{{ texts.assistant_generated }}</p>
+        </article>
+
+        <article class="assistant-story-card alert">
+            <p class="eyebrow">{{ texts.assistant_alert }}</p>
+            <h3>{{ assistant.financial_alert }}</h3>
+        </article>
+
+        <article class="assistant-story-card tip">
+            <p class="eyebrow">{{ texts.assistant_tip }}</p>
+            <h3>{{ assistant.saving_tip }}</h3>
+        </article>
+
+        <article class="assistant-categories-card">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">{{ texts.category_chart }}</p>
+                    <h3>{{ texts.categories }}</h3>
+                </div>
+            </div>
+            <div class="assistant-category-list">
+                {% for item in assistant.snapshot.top_categories %}
+                <div class="assistant-category-row">
+                    <div>
+                        <strong>{{ item.name }}</strong>
+                        <small>{{ texts.expense }}</small>
+                    </div>
+                    <span>{{ format_money(item.value) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </article>
+    </div>
+
+    <div class="assistant-side-column">
+        <article class="assistant-side-card">
+            <p class="eyebrow">{{ texts.assistant_overview }}</p>
+            <div class="assistant-overview-stack">
+                <div class="assistant-overview-row">
+                    <span>{{ texts.date_from }}</span>
+                    <strong>{{ assistant.snapshot.period.start_date }}</strong>
+                </div>
+                <div class="assistant-overview-row">
+                    <span>{{ texts.date_to }}</span>
+                    <strong>{{ assistant.snapshot.period.end_date }}</strong>
+                </div>
+                <div class="assistant-overview-row">
+                    <span>{{ texts.total_registered }}</span>
+                    <strong>{{ assistant.snapshot.entries_count }}</strong>
+                </div>
+                <div class="assistant-overview-row">
+                    <span>{{ texts.active_currency }}</span>
+                    <strong>{{ assistant.snapshot.currency }}</strong>
+                </div>
+            </div>
+        </article>
+
+        <article class="assistant-side-card">
+            <p class="eyebrow">API / IA</p>
+            <h3>{{ assistant.future_bridge.provider|upper }}</h3>
+            <p>{{ assistant.future_bridge.message }}</p>
+            <a class="inline-link" href="{{ assistant_api_url }}">{{ texts.assistant_open_api }}</a>
+        </article>
+
+        <article class="assistant-side-card">
+            <p class="eyebrow">{{ texts.transactions }}</p>
+            <div class="assistant-expense-feed">
+                {% for item in assistant.snapshot.recent_expenses %}
+                <div class="assistant-expense-item">
+                    <div>
+                        <strong>{{ item.description }}</strong>
+                        <small>{{ item.category }} · {{ item.date }}</small>
+                    </div>
+                    <span>{{ format_money(item.value) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </article>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

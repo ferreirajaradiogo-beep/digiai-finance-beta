@@ -1,0 +1,52 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="auth-layout">
+    <div class="auth-showcase">
+        <img class="auth-logo" src="{{ url_for('static', filename='icons/app-logo.png') }}" alt="Logo {{ texts.app_title }}">
+        <p class="section-overline">{{ app_display_name }}</p>
+        <h1>{{ texts.register_title }}</h1>
+        <p>Crie sua conta para testar o {{ app_display_name }} com a mesma base que depois vai evoluir para a versao completa.</p>
+        <div class="auth-bullet-list">
+            <div><span>✓</span><strong>Conta unica para acompanhar seus testes</strong></div>
+            <div><span>✓</span><strong>Dados salvos no servidor da beta</strong></div>
+            <div><span>✓</span><strong>Contato de suporte por e-mail</strong></div>
+        </div>
+    </div>
+
+    <div class="auth-card-modern">
+        <span class="eyebrow">{{ texts.create_account }}</span>
+        <h3>{{ texts.create_account }}</h3>
+
+        {% if error %}
+        <div class="flash flash-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" class="mobile-bank-form">
+            <label>
+                <span>{{ texts.username }}</span>
+                <input type="text" name="usuario" placeholder="{{ texts.username }}" required>
+            </label>
+
+            <label>
+                <span>{{ texts.password }}</span>
+                <input type="password" name="senha" placeholder="{{ texts.password }}" required>
+            </label>
+
+            <button type="submit">{{ texts.register }}</button>
+        </form>
+
+        <p class="auth-switch-modern">
+            {{ texts.has_account }}
+            <a href="{{ url_for('login') }}">{{ texts.sign_in }}</a>
+        </p>
+
+        <p class="auth-legal-text">
+            Ao criar a conta, voce concorda com a
+            <a href="{{ url_for('politica_privacidade') }}">Politica de Privacidade</a>
+            e os
+            <a href="{{ url_for('termos_de_uso') }}">Termos de Uso</a>.
+        </p>
+    </div>
+</section>
+{% endblock %}

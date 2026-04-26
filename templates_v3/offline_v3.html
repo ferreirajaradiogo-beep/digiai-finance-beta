@@ -1,0 +1,12 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="single-form-shell offline-shell">
+    <article class="auth-card-modern">
+        <span class="eyebrow">Offline</span>
+        <h3>{{ texts.offline_title }}</h3>
+        <p class="section-helper">{{ texts.offline_text }}</p>
+        <a href="{{ url_for('index') }}" class="primary-link-button">{{ texts.back_dashboard }}</a>
+    </article>
+</section>
+{% endblock %}

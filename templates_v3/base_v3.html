@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="{{ settings.idioma if settings else 'pt-BR' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ app_display_name }}</title>
+    <meta name="theme-color" content="#1562ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="{{ url_for('manifest') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icons/favicon.png') }}" type="image/png">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-app.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_v3.css', v='beta-1') }}">
+</head>
+{% set current_endpoint = request.endpoint or '' %}
+{% set current_title = texts.dashboard %}
+{% if current_endpoint == 'organizacao' %}
+    {% set current_title = texts.management %}
+{% elif current_endpoint == 'configuracoes' %}
+    {% set current_title = 'Perfil' %}
+{% elif current_endpoint == 'planos' %}
+    {% set current_title = texts.plans %}
+{% elif current_endpoint == 'assistente_financeiro' %}
+    {% set current_title = texts.assistant_title %}
+{% elif current_endpoint == 'editar' %}
+    {% set current_title = texts.edit_transaction %}
+{% elif current_endpoint == 'login' %}
+    {% set current_title = texts.login_title %}
+{% elif current_endpoint == 'cadastro' %}
+    {% set current_title = texts.register_title %}
+{% endif %}
+<body class="theme-{{ settings.tema if settings else 'dark' }}">
+    <div class="app-noise"></div>
+    <div class="page-orb orb-one"></div>
+    <div class="page-orb orb-two"></div>
+
+    <div class="layout-shell {% if session.get('user') %}layout-shell-auth{% else %}layout-shell-guest{% endif %}">
+        {% if session.get("user") %}
+        <aside class="rail-nav">
+            <div class="rail-brand">
+                <img class="rail-brand-logo" src="{{ url_for('static', filename='icons/app-logo.png') }}" alt="Logo {{ texts.app_title }}">
+                <div>
+                    <span class="eyebrow">{{ app_display_name }}</span>
+                    <h2>{{ app_display_name }}</h2>
+                    <p>{{ texts.welcome }}, {{ session["user"] }}</p>
+                </div>
+            </div>
+
+            <nav class="rail-menu">
+                <a href="{{ url_for('index') }}" class="nav-pill {% if current_endpoint == 'index' %}active{% endif %}">
+                    <span class="nav-pill-icon">⌂</span>
+                    <span>{{ texts.dashboard }}</span>
+                </a>
+                <a href="{{ url_for('index') }}#novo-lancamento" class="nav-pill {% if current_endpoint == 'index' %}active{% endif %}">
+                    <span class="nav-pill-icon">＋</span>
+                    <span>{{ texts.new_transaction }}</span>
+                </a>
+                <a href="{{ url_for('index') }}#relatorios" class="nav-pill {% if current_endpoint == 'index' %}active{% endif %}">
+                    <span class="nav-pill-icon">◔</span>
+                    <span>{{ texts.reports_title }}</span>
+                </a>
+                <a href="{{ url_for('organizacao') }}" class="nav-pill {% if current_endpoint == 'organizacao' %}active{% endif %}">
+                    <span class="nav-pill-icon">▣</span>
+                    <span>{{ texts.management }}</span>
+                </a>
+                <a href="{{ url_for('assistente_financeiro') }}" class="nav-pill {% if current_endpoint == 'assistente_financeiro' %}active{% endif %}">
+                    <span class="nav-pill-icon">✦</span>
+                    <span>{{ texts.assistant_nav }}</span>
+                </a>
+                <a href="{{ url_for('configuracoes') }}" class="nav-pill {% if current_endpoint == 'configuracoes' %}active{% endif %}">
+                    <span class="nav-pill-icon">{{ session["user"][0]|upper }}</span>
+                    <span>Perfil</span>
+                </a>
+            </nav>
+
+            <div class="rail-plan-card">
+                <span class="eyebrow">Beta publica</span>
+                <strong>Plano gratuito ativo</strong>
+                <p>Sem pagamento nesta fase. Validacao real com usuarios antes da versao completa.</p>
+                <a href="{{ url_for('planos') }}" class="ghost-link">{{ texts.plans }}</a>
+            </div>
+
+            <div class="rail-actions">
+                <button id="install-trigger" class="rail-install-button" hidden>{{ texts.install_app }}</button>
+                <a href="{{ url_for('logout') }}" class="rail-logout-link">{{ texts.logout }}</a>
+            </div>
+        </aside>
+        {% endif %}
+
+        <div class="workspace-shell">
+            {% if session.get("user") %}
+            <header class="topbar-modern">
+                <div class="topbar-copy">
+                    <span class="eyebrow">{{ app_display_name }}</span>
+                    <h1>{{ current_title }}</h1>
+                    <p class="topbar-subtitle">
+                        {% if current_endpoint == 'index' %}
+                        {{ texts.summary }}
+                        {% elif current_endpoint == 'organizacao' %}
+                        {{ texts.manage_help }}
+                        {% elif current_endpoint == 'configuracoes' %}
+                        {{ texts.preferences_help }}
+                        {% elif current_endpoint == 'assistente_financeiro' %}
+                        {{ texts.assistant_subtitle }}
+                        {% else %}
+                        {{ app_display_name }}
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div class="topbar-actions">
+                    <a class="topbar-chip primary" href="{{ url_for('index') }}#novo-lancamento">+ {{ texts.new_transaction }}</a>
+                    <a class="topbar-chip" href="{{ url_for('backup_download') }}">{{ texts.download_backup }}</a>
+                    <a class="topbar-avatar" href="{{ url_for('configuracoes') }}">{{ session["user"][0]|upper }}</a>
+                </div>
+            </header>
+            {% endif %}
+
+            <main class="page-body {% if not session.get('user') %}page-body-guest{% endif %}">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <section class="flash-stack">
+                            {% for category, message in messages %}
+                            <div class="flash flash-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        </section>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+
+                <footer class="brand-footer">
+                    <img src="{{ url_for('static', filename='icons/company-logo.png') }}" alt="Logo da empresa proprietária">
+                    <div>
+                        <span>Propriedade de {{ company_name }} • {{ current_year }}</span>
+                        <strong><a href="mailto:{{ support_email }}">{{ support_email }}</a></strong>
+                    </div>
+                    <div class="brand-footer-links">
+                        <a href="{{ url_for('politica_privacidade') }}">Politica de privacidade</a>
+                        <a href="{{ url_for('termos_de_uso') }}">Termos de uso</a>
+                    </div>
+                </footer>
+            </main>
+
+            {% if session.get("user") %}
+            <nav class="mobile-app-nav">
+                <a href="{{ url_for('index') }}" class="{% if current_endpoint == 'index' %}active{% endif %}">
+                    <span class="mobile-app-icon">⌂</span>
+                    <span>{{ texts.dashboard }}</span>
+                </a>
+                <a href="{{ url_for('index') }}#novo-lancamento" class="{% if current_endpoint == 'index' %}active{% endif %}">
+                    <span class="mobile-app-icon">＋</span>
+                    <span>{{ texts.new_transaction }}</span>
+                </a>
+                <a href="{{ url_for('organizacao') }}" class="{% if current_endpoint == 'organizacao' %}active{% endif %}">
+                    <span class="mobile-app-icon">▣</span>
+                    <span>{{ texts.management }}</span>
+                </a>
+                <a href="{{ url_for('index') }}#relatorios" class="{% if current_endpoint == 'index' %}active{% endif %}">
+                    <span class="mobile-app-icon">◔</span>
+                    <span>{{ texts.reports_title }}</span>
+                </a>
+                <a href="{{ url_for('configuracoes') }}" class="{% if current_endpoint == 'configuracoes' %}active{% endif %}">
+                    <span class="mobile-app-icon">{{ session["user"][0]|upper }}</span>
+                    <span>Perfil</span>
+                </a>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js', v='beta-1') }}" defer></script>
+</body>
+</html>

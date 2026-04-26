@@ -1,0 +1,62 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="page-hero-inline">
+    <div>
+        <span class="eyebrow">{{ texts.edit_transaction }}</span>
+        <h2>{{ texts.edit_transaction }}</h2>
+        <p>{{ dado['descricao'] }}</p>
+    </div>
+    <a class="bank-secondary-button" href="{{ url_for('index') }}">{{ texts.dashboard }}</a>
+</section>
+
+<section class="single-form-shell">
+    <article class="bank-card launch-card edit-card">
+        <form method="POST" class="mobile-bank-form">
+            <div class="type-switch">
+                <label class="type-chip income">
+                    <input type="radio" name="tipo" value="receita" {% if dado["tipo"] == "receita" %}checked{% endif %}>
+                    <span>{{ texts.income }}</span>
+                </label>
+                <label class="type-chip expense">
+                    <input type="radio" name="tipo" value="despesa" {% if dado["tipo"] == "despesa" %}checked{% endif %}>
+                    <span>{{ texts.expense }}</span>
+                </label>
+            </div>
+
+            <label>
+                <span>{{ texts.description }}</span>
+                <input type="text" name="descricao" value="{{ dado['descricao'] }}" required>
+            </label>
+            <label>
+                <span>{{ texts.amount }}</span>
+                <input type="text" name="valor" value="{{ dado['valor'] }}" required>
+            </label>
+            <label>
+                <span>{{ texts.date }}</span>
+                <input type="date" name="data" value="{{ dado['data'] }}">
+            </label>
+            <label>
+                <span>{{ texts.account }}</span>
+                <select name="conta_id">
+                    <option value="">-</option>
+                    {% for conta in contas %}
+                    <option value="{{ conta['id'] }}" {% if dado['conta_id'] == conta['id'] %}selected{% endif %}>{{ conta['nome'] }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>
+                <span>{{ texts.category }}</span>
+                <select name="categoria_id">
+                    <option value="">-</option>
+                    {% for categoria in categorias %}
+                    <option value="{{ categoria['id'] }}" {% if dado['categoria_id'] == categoria['id'] %}selected{% endif %}>{{ categoria['nome'] }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <button type="submit" class="bank-primary-button full">{{ texts.update }}</button>
+        </form>
+    </article>
+</section>
+{% endblock %}

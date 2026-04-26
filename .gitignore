@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+.env
+instance/
+backups/
+data/
+financeiro_beta.db
+*.sqlite
+*.sqlite3
