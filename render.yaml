@@ -22,13 +22,7 @@ services:
         value: DigiAI
       - key: NOTAFACIL_SUPPORT_EMAIL
         value: digiai.oficial@gmail.com
+      - key: NOTAFACIL_BACKEND_URL
+        value: https://notafacil-api.onrender.com
       - key: DATABASE_URL
-        fromDatabase:
-          name: digiai-finance-beta-db
-          property: connectionString
-
-databases:
-  - name: digiai-finance-beta-db
-    databaseName: digiaifinancebeta
-    user: digiaifinancebeta
-    plan: free
+        value: ""
