@@ -586,6 +586,23 @@ def backend_user_from_session():
     return user if isinstance(user, dict) else {}
 
 
+def backend_snapshot_from_session():
+    snapshot = session.get("backend_snapshot_cache")
+    return snapshot if isinstance(snapshot, dict) else {}
+
+
+def store_backend_snapshot(snapshot):
+    if isinstance(snapshot, dict):
+        session["backend_snapshot_cache"] = snapshot
+        session.modified = True
+
+
+def mark_backend_unavailable(message="O backend esta acordando. Tente novamente em instantes."):
+    g.backend_unavailable = True
+    if not getattr(g, "backend_status_message", ""):
+        g.backend_status_message = message
+
+
 def update_backend_session_user(payload):
     if not payload:
         return
@@ -634,18 +651,33 @@ def backend_api_request(path, method="GET", token="", body=None, query=None):
 def refresh_backend_me():
     if not (backend_mode_enabled() and get_backend_token()):
         return backend_user_from_session()
-    payload = backend_api_request("/me", token=get_backend_token())
-    update_backend_session_user(payload)
-    return payload
+    try:
+        payload = backend_api_request("/me", token=get_backend_token())
+        update_backend_session_user(payload)
+        return payload
+    except ConnectionError:
+        mark_backend_unavailable()
+        return backend_user_from_session()
+    except ValueError as exc:
+        mark_backend_unavailable(str(exc) or "Nao foi possivel atualizar a sessao online agora.")
+        return backend_user_from_session()
 
 
 def get_backend_snapshot(force=False):
     if not backend_mode_enabled():
         return {}
     if not get_backend_token():
-        return {}
+        return backend_snapshot_from_session()
     if force or not hasattr(g, "backend_snapshot"):
-        g.backend_snapshot = backend_api_request("/sync/pull", token=get_backend_token())
+        try:
+            g.backend_snapshot = backend_api_request("/sync/pull", token=get_backend_token())
+            store_backend_snapshot(g.backend_snapshot)
+        except ConnectionError:
+            mark_backend_unavailable()
+            g.backend_snapshot = backend_snapshot_from_session()
+        except ValueError as exc:
+            mark_backend_unavailable(str(exc) or "Nao foi possivel atualizar os dados online agora.")
+            g.backend_snapshot = backend_snapshot_from_session()
     return g.backend_snapshot
 
 
@@ -1514,6 +1546,9 @@ def inject_layout_context():
     texts = get_texts(settings["idioma"])
     active_plan_key = get_plan_key(user) if user else "free"
     effective_beta_mode = PUBLIC_BETA_MODE and not backend_mode_enabled()
+    backend_user = backend_user_from_session() if user else {}
+    account_email = backend_user.get("email", "") if isinstance(backend_user, dict) else ""
+    account_is_online = bool(user and backend_mode_enabled() and get_backend_token())
     settings["plano"] = active_plan_key
     allowed_theme_values = {key for key, _ in get_theme_options_for_plan(active_plan_key)}
     if settings.get("tema") not in allowed_theme_values:
@@ -1545,6 +1580,11 @@ def inject_layout_context():
         "free_theme_options": FREE_THEME_OPTIONS,
         "paid_theme_options": PAID_THEME_OPTIONS,
         "account_type_options": account_type_options,
+        "account_username": user or "",
+        "account_email": account_email,
+        "account_is_online": account_is_online,
+        "backend_unavailable": getattr(g, "backend_unavailable", False),
+        "backend_status_message": getattr(g, "backend_status_message", ""),
         "format_money": lambda value: format_currency(value, settings["moeda"]),
     }
 
@@ -1973,8 +2013,43 @@ def delete(item_id):
 def configuracoes():
     user = session["user"]
     current_settings = get_settings(user)
+    language = current_settings["idioma"]
 
     if request.method == "POST":
+        form_name = request.form.get("form_name", "settings").strip().lower()
+        if form_name == "password":
+            if not backend_mode_enabled():
+                flash("A conta local nao permite troca de senha online nesta tela.", "info")
+                return redirect(url_for("configuracoes"))
+
+            current_password = request.form.get("current_password", "")
+            new_password = request.form.get("new_password", "")
+            confirm_password = request.form.get("confirm_password", "")
+
+            if not current_password:
+                flash("Informe a senha atual.", "error")
+                return redirect(url_for("configuracoes"))
+            if len(new_password) < 6:
+                flash("Use uma nova senha com pelo menos 6 caracteres.", "error")
+                return redirect(url_for("configuracoes"))
+            if new_password != confirm_password:
+                flash("A confirmacao da nova senha nao confere.", "error")
+                return redirect(url_for("configuracoes"))
+
+            try:
+                backend_api_request(
+                    "/me/password",
+                    method="PATCH",
+                    token=get_backend_token(),
+                    body={"current_password": current_password, "new_password": new_password},
+                )
+                flash("Senha atualizada com sucesso.", "success")
+            except ValueError as exc:
+                flash(str(exc) or "Nao foi possivel atualizar a senha agora.", "error")
+            except ConnectionError:
+                flash("Nao foi possivel conectar ao backend agora.", "error")
+            return redirect(url_for("configuracoes"))
+
         idioma = request.form.get("idioma", DEFAULT_SETTINGS["idioma"])
         moeda = request.form.get("moeda", DEFAULT_SETTINGS["moeda"])
         tema = request.form.get("tema", DEFAULT_SETTINGS["tema"])
@@ -1996,6 +2071,29 @@ def configuracoes():
                 alerta_limite = parse_amount(request.form.get("alerta_limite", "0"))
             except ValueError:
                 alerta_limite = 0
+
+        if backend_mode_enabled():
+            try:
+                payload = backend_api_request(
+                    "/me/settings",
+                    method="PATCH",
+                    token=get_backend_token(),
+                    body={
+                        "language": idioma,
+                        "currency": moeda,
+                        "theme_key": tema,
+                        "monthly_limit": alerta_limite,
+                    },
+                )
+                update_backend_session_user(payload)
+                get_backend_snapshot(force=True)
+                current_settings = get_settings(user)
+                flash(get_texts(current_settings["idioma"])["settings_saved"], "success")
+            except ValueError as exc:
+                flash(str(exc) or "Nao foi possivel salvar as preferencias agora.", "error")
+            except ConnectionError:
+                flash("Nao foi possivel conectar ao backend agora.", "error")
+            return redirect(url_for("configuracoes"))
 
         save_settings(user, idioma, moeda, tema, alerta_limite=alerta_limite)
         write_local_backup(user)

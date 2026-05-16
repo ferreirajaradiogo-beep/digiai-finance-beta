@@ -54,12 +54,59 @@
     <article class="bank-card settings-panel-modern">
         <div class="card-header">
             <div>
+                <span class="eyebrow">Acesso da conta</span>
+                <h3>Login e senha</h3>
+            </div>
+        </div>
+
+        <div class="profile-stat-grid">
+            <div class="profile-stat-item">
+                <span>Usuario</span>
+                <strong>{{ account_username }}</strong>
+            </div>
+            <div class="profile-stat-item">
+                <span>E-mail</span>
+                <strong>{{ account_email or 'Conta local sem e-mail sincronizado' }}</strong>
+            </div>
+        </div>
+
+        {% if account_is_online %}
+        <form method="POST" class="mobile-bank-form">
+            <input type="hidden" name="form_name" value="password">
+
+            <label>
+                <span>Senha atual</span>
+                <input type="password" name="current_password" placeholder="Digite sua senha atual" required>
+            </label>
+
+            <label>
+                <span>Nova senha</span>
+                <input type="password" name="new_password" placeholder="Minimo de 6 caracteres" required>
+            </label>
+
+            <label>
+                <span>Confirmar nova senha</span>
+                <input type="password" name="confirm_password" placeholder="Repita a nova senha" required>
+            </label>
+
+            <button type="submit" class="bank-primary-button full">Atualizar senha</button>
+        </form>
+        {% else %}
+        <p class="section-helper">Esta conta esta no modo local. Para usar troca de senha online, entre com uma conta conectada ao backend oficial.</p>
+        {% endif %}
+    </article>
+
+    <article class="bank-card settings-panel-modern">
+        <div class="card-header">
+            <div>
                 <span class="eyebrow">{{ texts.preferences }}</span>
                 <h3>{{ texts.preferences }}</h3>
             </div>
         </div>
 
         <form method="POST" class="mobile-bank-form">
+            <input type="hidden" name="form_name" value="settings">
+
             <label>
                 <span>{{ texts.language }}</span>
                 <select name="idioma">

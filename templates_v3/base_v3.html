@@ -117,6 +117,11 @@
             {% endif %}
 
             <main class="page-body {% if not session.get('user') %}page-body-guest{% endif %}">
+                {% if backend_unavailable and backend_status_message %}
+                    <section class="flash-stack">
+                        <div class="flash flash-info">{{ backend_status_message }}</div>
+                    </section>
+                {% endif %}
                 {% with messages = get_flashed_messages(with_categories=true) %}
                     {% if messages %}
                         <section class="flash-stack">
