@@ -1,4 +1,5 @@
 let deferredPrompt = null;
+let hasReloadedForNewWorker = false;
 
 function wireInstallButton(button) {
     if (!button) return;
@@ -30,6 +31,14 @@ window.addEventListener("appinstalled", () => {
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js");
+        navigator.serviceWorker.register("/service-worker.js?v=beta-2").then((registration) => {
+            registration.update().catch(() => {});
+        }).catch(() => {});
+    });
+
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (hasReloadedForNewWorker) return;
+        hasReloadedForNewWorker = true;
+        window.location.reload();
     });
 }

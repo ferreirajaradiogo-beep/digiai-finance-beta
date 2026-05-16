@@ -1,9 +1,9 @@
-const CACHE_NAME = "notafacil-beta-pwa-v1";
+const CACHE_NAME = "notafacil-beta-pwa-v2";
 const APP_SHELL = [
   "/offline",
-  "/manifest.webmanifest",
-  "/static_v3/style_v3.css?v=beta-1",
-  "/static_v3/app.js?v=beta-1",
+  "/manifest.webmanifest?v=beta-2",
+  "/static_v3/style_v3.css?v=beta-2",
+  "/static_v3/app.js?v=beta-2",
   "/static_v3/icons/icon-app.png",
   "/static_v3/icons/icon-maskable.png",
   "/static_v3/icons/favicon.png",
@@ -30,11 +30,7 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
+        .then((response) => response)
         .catch(() => caches.match(event.request).then((response) => response || caches.match("/offline")))
     );
     return;

@@ -7,10 +7,10 @@
     <meta name="theme-color" content="#1562ff">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="{{ url_for('manifest') }}">
+    <link rel="manifest" href="{{ url_for('manifest', v='beta-2') }}">
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-app.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style_v3.css', v='beta-1') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_v3.css', v='beta-2') }}">
 </head>
 {% set current_endpoint = request.endpoint or '' %}
 {% set current_title = texts.dashboard %}
@@ -169,6 +169,6 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='app.js', v='beta-1') }}" defer></script>
+    <script src="{{ url_for('static', filename='app.js', v='beta-2') }}" defer></script>
 </body>
 </html>
