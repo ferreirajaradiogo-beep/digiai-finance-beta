@@ -23,6 +23,15 @@ Agora, a beta aceita:
 - PostgreSQL via `DATABASE_URL` para deploy
 
 Se a variavel `DATABASE_URL` estiver preenchida, o app usa Postgres automaticamente.
+Se a variavel `NOTAFACIL_BACKEND_URL` estiver preenchida, a web passa a usar o backend oficial como fonte de verdade para:
+
+- login
+- cadastro
+- plano Free/Pro
+- contas
+- categorias
+- lancamentos
+- configuracoes
 
 ## Arquivos prontos
 
@@ -78,6 +87,10 @@ Ja definidas no blueprint:
 - `NOTAFACIL_SUPPORT_EMAIL=digiai.oficial@gmail.com`
 - `DATABASE_URL` vindo do banco Postgres criado no Render
 
+Depois que o backend estiver online, adicione manualmente no web service:
+
+- `NOTAFACIL_BACKEND_URL=https://SEU-BACKEND.onrender.com`
+
 ### 5. Teste apos deploy
 
 Abra estas rotas:
@@ -96,6 +109,7 @@ Depois teste o fluxo:
 4. sair
 5. entrar de novo
 6. confirmar se os dados continuam salvos
+7. abrir o app mobile com a mesma conta e confirmar se os dados batem
 
 ## Limitacoes do plano gratuito
 

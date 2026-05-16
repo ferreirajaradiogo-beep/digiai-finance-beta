@@ -6,10 +6,14 @@ from datetime import date, timedelta
 from functools import wraps
 from io import BytesIO, StringIO
 from pathlib import Path
+from urllib import error as urllib_error
+from urllib import parse as urllib_parse
+from urllib import request as urllib_request
 
 from flask import (
     Flask,
     flash,
+    g,
     make_response,
     redirect,
     render_template,
@@ -49,6 +53,7 @@ SUPPORT_EMAIL = os.environ.get("NOTAFACIL_SUPPORT_EMAIL", "digiai.oficial@gmail.
 PUBLIC_BETA_MODE = True
 DB_PATH = Path(os.environ.get("NOTAFACIL_DB_PATH", str(BASE_DIR / "financeiro_beta.db"))).expanduser()
 BACKUP_DIR = Path(os.environ.get("NOTAFACIL_BACKUP_DIR", str(BASE_DIR / "backups"))).expanduser()
+BACKEND_API_URL = (os.environ.get("NOTAFACIL_BACKEND_URL", "") or "").strip().rstrip("/")
 
 DEFAULT_SETTINGS = {"idioma": "pt-BR", "moeda": "BRL", "tema": "dark", "plano": "free"}
 FREE_ALLOWED_COLORS = ["#58d5ff", "#7cf0bb", "#ffab7a", "#ff7c93"]
@@ -568,6 +573,94 @@ MONTH_LABELS = {
 }
 
 
+def backend_mode_enabled():
+    return bool(BACKEND_API_URL)
+
+
+def get_backend_token():
+    return session.get("api_token", "")
+
+
+def backend_user_from_session():
+    user = session.get("backend_user")
+    return user if isinstance(user, dict) else {}
+
+
+def update_backend_session_user(payload):
+    if not payload:
+        return
+    session["backend_user"] = dict(payload)
+    session["user"] = payload.get("username", session.get("user", ""))
+    session.permanent = True
+
+
+def backend_api_request(path, method="GET", token="", body=None, query=None):
+    if not backend_mode_enabled():
+        raise RuntimeError("Backend API nao configurada")
+
+    url = f"{BACKEND_API_URL}{path}"
+    if query:
+        clean_query = {key: value for key, value in query.items() if value not in (None, "", [])}
+        if clean_query:
+            url = f"{url}?{urllib_parse.urlencode(clean_query)}"
+
+    headers = {"Accept": "application/json"}
+    payload = None
+    if body is not None:
+        payload = json.dumps(body).encode("utf-8")
+        headers["Content-Type"] = "application/json"
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    req = urllib_request.Request(url, data=payload, headers=headers, method=method.upper())
+    try:
+        with urllib_request.urlopen(req, timeout=15) as response:
+            raw = response.read().decode("utf-8")
+            return json.loads(raw) if raw else {}
+    except urllib_error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="ignore")
+        detail = ""
+        if raw:
+            try:
+                parsed = json.loads(raw)
+                detail = parsed.get("detail") if isinstance(parsed, dict) else raw
+            except json.JSONDecodeError:
+                detail = raw
+        raise ValueError(detail or f"Erro HTTP {exc.code}") from exc
+    except urllib_error.URLError as exc:
+        raise ConnectionError("Nao foi possivel conectar ao backend.") from exc
+
+
+def refresh_backend_me():
+    if not (backend_mode_enabled() and get_backend_token()):
+        return backend_user_from_session()
+    payload = backend_api_request("/me", token=get_backend_token())
+    update_backend_session_user(payload)
+    return payload
+
+
+def get_backend_snapshot(force=False):
+    if not backend_mode_enabled():
+        return {}
+    if not get_backend_token():
+        return {}
+    if force or not hasattr(g, "backend_snapshot"):
+        g.backend_snapshot = backend_api_request("/sync/pull", token=get_backend_token())
+    return g.backend_snapshot
+
+
+def backend_categories_map():
+    snapshot = get_backend_snapshot()
+    categories = snapshot.get("categories") or []
+    return {item["id"]: item for item in categories if isinstance(item, dict) and item.get("id") is not None}
+
+
+def backend_accounts_map():
+    snapshot = get_backend_snapshot()
+    accounts = snapshot.get("accounts") or []
+    return {item["id"]: item for item in accounts if isinstance(item, dict) and item.get("id") is not None}
+
+
 def conectar():
     return connect(DB_PATH)
 
@@ -745,6 +838,9 @@ def login_required(view):
     def wrapped_view(*args, **kwargs):
         if "user" not in session:
             return redirect(url_for("login"))
+        if backend_mode_enabled() and not session.get("api_token"):
+            session.clear()
+            return redirect(url_for("login"))
         return view(*args, **kwargs)
 
     return wrapped_view
@@ -815,6 +911,8 @@ def format_currency(value, currency):
 
 
 def ensure_user_settings(usuario):
+    if backend_mode_enabled():
+        return
     conn = conectar()
     c = conn.cursor()
     c.execute("SELECT usuario FROM configuracoes WHERE usuario=?", (usuario,))
@@ -837,6 +935,15 @@ def ensure_user_settings(usuario):
 def get_settings(usuario):
     if not usuario:
         return DEFAULT_SETTINGS.copy()
+    if backend_mode_enabled():
+        backend_user = refresh_backend_me() or backend_user_from_session()
+        return {
+            "idioma": backend_user.get("language", DEFAULT_SETTINGS["idioma"]),
+            "moeda": backend_user.get("currency", DEFAULT_SETTINGS["moeda"]),
+            "tema": backend_user.get("theme_key", DEFAULT_SETTINGS["tema"]),
+            "plano": backend_user.get("plan", "free"),
+            "alerta_limite": float(backend_user.get("monthly_limit") or 0),
+        }
     ensure_user_settings(usuario)
     conn = conectar()
     c = conn.cursor()
@@ -855,6 +962,18 @@ def get_settings(usuario):
 
 
 def save_settings(usuario, idioma, moeda, tema, plano=None, alerta_limite=None):
+    if backend_mode_enabled():
+        payload = {
+            "language": idioma,
+            "currency": moeda,
+            "theme_key": tema,
+            "monthly_limit": float(alerta_limite or 0),
+        }
+        response = backend_api_request("/me/settings", method="PATCH", token=get_backend_token(), body=payload)
+        update_backend_session_user(response)
+        if hasattr(g, "backend_snapshot"):
+            delattr(g, "backend_snapshot")
+        return
     if plano is None:
         plano = get_plan_key(usuario)
     if alerta_limite is None:
@@ -879,6 +998,8 @@ def save_settings(usuario, idioma, moeda, tema, plano=None, alerta_limite=None):
 
 
 def get_plan_key(usuario):
+    if backend_mode_enabled():
+        return get_settings(usuario).get("plano", "free")
     if PUBLIC_BETA_MODE:
         return "free"
     settings = get_settings(usuario)
@@ -886,24 +1007,34 @@ def get_plan_key(usuario):
 
 
 def get_plan_config(plan_key):
+    if backend_mode_enabled():
+        return PLANS.get(plan_key, PLANS["free"])
     if PUBLIC_BETA_MODE:
         return PLANS["free"]
     return PLANS.get(plan_key, PLANS["free"])
 
 
 def get_theme_options_for_plan(plan_key):
+    if backend_mode_enabled():
+        return PAID_THEME_OPTIONS if plan_key == "pro" else FREE_THEME_OPTIONS
     if PUBLIC_BETA_MODE:
         return FREE_THEME_OPTIONS
     return PAID_THEME_OPTIONS if plan_key == "pro" else FREE_THEME_OPTIONS
 
 
 def is_paid_user(usuario):
+    if backend_mode_enabled():
+        return get_plan_key(usuario) == "pro"
     if PUBLIC_BETA_MODE:
         return False
     return get_plan_key(usuario) == "pro"
 
 
 def count_transactions_this_month(usuario):
+    if backend_mode_enabled():
+        current_month = date.today().strftime("%Y-%m")
+        rows = fetch_transactions(usuario)
+        return sum(1 for row in rows if (row["created_at"] or row["data"] or "").startswith(current_month))
     conn = conectar()
     c = conn.cursor()
     current_month = date.today().strftime("%Y-%m")
@@ -933,6 +1064,8 @@ def count_transactions_this_month(usuario):
 
 
 def count_user_categories(usuario):
+    if backend_mode_enabled():
+        return len(get_user_categories(usuario))
     conn = conectar()
     c = conn.cursor()
     c.execute("SELECT COUNT(*) AS total FROM categorias WHERE usuario=?", (usuario,))
@@ -942,6 +1075,8 @@ def count_user_categories(usuario):
 
 
 def count_user_accounts(usuario):
+    if backend_mode_enabled():
+        return len(get_user_accounts(usuario))
     conn = conectar()
     c = conn.cursor()
     c.execute("SELECT COUNT(*) AS total FROM contas WHERE usuario=?", (usuario,))
@@ -951,6 +1086,9 @@ def count_user_accounts(usuario):
 
 
 def get_available_years(usuario):
+    if backend_mode_enabled():
+        years = sorted({(row["data"] or "")[:4] for row in fetch_transactions(usuario) if row.get("data")}, reverse=True)
+        return [year for year in years if year]
     conn = conectar()
     c = conn.cursor()
     if DB_BACKEND == "postgres":
@@ -1005,6 +1143,8 @@ def enforce_free_plan_limit(usuario, resource, language, extra=None):
 
 
 def ensure_default_categories_and_accounts(usuario):
+    if backend_mode_enabled():
+        return
     conn = conectar()
     c = conn.cursor()
 
@@ -1085,6 +1225,12 @@ def ensure_default_categories_and_accounts(usuario):
 
 
 def get_user_categories(usuario):
+    if backend_mode_enabled():
+        categories = list((get_backend_snapshot().get("categories") or []))
+        return [
+            {"id": item["id"], "nome": item["name"], "cor": item.get("color", "#58d5ff")}
+            for item in categories
+        ]
     ensure_default_categories_and_accounts(usuario)
     conn = conectar()
     c = conn.cursor()
@@ -1098,6 +1244,12 @@ def get_user_categories(usuario):
 
 
 def get_user_accounts(usuario):
+    if backend_mode_enabled():
+        accounts = list((get_backend_snapshot().get("accounts") or []))
+        return [
+            {"id": item["id"], "nome": item["name"], "tipo": item.get("kind", "bank")}
+            for item in accounts
+        ]
     ensure_default_categories_and_accounts(usuario)
     conn = conectar()
     c = conn.cursor()
@@ -1113,6 +1265,9 @@ def get_user_accounts(usuario):
 def get_category_name(usuario, categoria_id):
     if not categoria_id:
         return ""
+    if backend_mode_enabled():
+        item = backend_categories_map().get(categoria_id)
+        return item.get("name", "") if item else ""
     conn = conectar()
     c = conn.cursor()
     c.execute("SELECT nome FROM categorias WHERE id=? AND usuario=?", (categoria_id, usuario))
@@ -1124,6 +1279,9 @@ def get_category_name(usuario, categoria_id):
 def get_account_name(usuario, conta_id):
     if not conta_id:
         return ""
+    if backend_mode_enabled():
+        item = backend_accounts_map().get(conta_id)
+        return item.get("name", "") if item else ""
     conn = conectar()
     c = conn.cursor()
     c.execute("SELECT nome FROM contas WHERE id=? AND usuario=?", (conta_id, usuario))
@@ -1233,6 +1391,35 @@ def build_alerts(dados, settings, language):
 
 
 def fetch_transactions(usuario, data_inicial="", data_final=""):
+    if backend_mode_enabled():
+        snapshot = get_backend_snapshot()
+        accounts = backend_accounts_map()
+        categories = backend_categories_map()
+        rows = []
+        for item in snapshot.get("transactions") or []:
+            raw_date = item.get("date", "")
+            if data_inicial and raw_date < data_inicial:
+                continue
+            if data_final and raw_date > data_final:
+                continue
+            tx_type = item.get("type", "despesa")
+            raw_value = float(item.get("value") or 0)
+            rows.append(
+                {
+                    "id": item["id"],
+                    "tipo": tx_type,
+                    "descricao": item.get("description", ""),
+                    "valor": abs(raw_value),
+                    "categoria_nome": categories.get(item.get("category_id"), {}).get("name", ""),
+                    "conta_nome": accounts.get(item.get("account_id"), {}).get("name", ""),
+                    "data": raw_date,
+                    "created_at": raw_date,
+                    "categoria_id": item.get("category_id"),
+                    "conta_id": item.get("account_id"),
+                }
+            )
+        rows.sort(key=lambda row: ((row["data"] or ""), row["id"]), reverse=True)
+        return rows
     conn = conectar()
     c = conn.cursor()
     query = """
@@ -1326,6 +1513,7 @@ def inject_layout_context():
     settings = get_settings(user) if user else DEFAULT_SETTINGS.copy()
     texts = get_texts(settings["idioma"])
     active_plan_key = get_plan_key(user) if user else "free"
+    effective_beta_mode = PUBLIC_BETA_MODE and not backend_mode_enabled()
     settings["plano"] = active_plan_key
     allowed_theme_values = {key for key, _ in get_theme_options_for_plan(active_plan_key)}
     if settings.get("tema") not in allowed_theme_values:
@@ -1341,7 +1529,7 @@ def inject_layout_context():
         "app_tagline": APP_TAGLINE,
         "company_name": COMPANY_NAME,
         "support_email": SUPPORT_EMAIL,
-        "beta_public_mode": PUBLIC_BETA_MODE,
+        "beta_public_mode": effective_beta_mode,
         "current_year": date.today().year,
         "settings": settings,
         "texts": texts,
@@ -1377,6 +1565,23 @@ def login():
         if error:
             return render_template("login_v3.html", error=error)
 
+        if backend_mode_enabled():
+            try:
+                payload = backend_api_request(
+                    "/auth/login",
+                    method="POST",
+                    body={"username": usuario, "password": senha},
+                )
+                session["api_token"] = payload["access_token"]
+                update_backend_session_user(payload["user"])
+                get_backend_snapshot(force=True)
+                return redirect(url_for("index"))
+            except ValueError as exc:
+                error = str(exc) or TRANSLATIONS["pt-BR"]["wrong_password"]
+            except ConnectionError:
+                error = "Nao foi possivel conectar ao backend agora."
+            return render_template("login_v3.html", error=error)
+
         conn = conectar()
         c = conn.cursor()
         c.execute("SELECT * FROM usuarios WHERE usuario=?", (usuario,))
@@ -1407,9 +1612,34 @@ def cadastro():
     error = None
     if request.method == "POST":
         usuario = request.form.get("usuario", "").strip()
+        email = request.form.get("email", "").strip().lower()
         senha = request.form.get("senha", "")
         error = validate_registration_credentials(usuario, senha, "pt-BR")
         if error:
+            return render_template("cadastro_v3.html", error=error)
+
+        if backend_mode_enabled():
+            if "@" not in email or len(email) < 5:
+                error = "Informe um e-mail valido."
+                return render_template("cadastro_v3.html", error=error)
+            if len(senha) < 6:
+                error = "Use uma senha com pelo menos 6 caracteres."
+                return render_template("cadastro_v3.html", error=error)
+            try:
+                payload = backend_api_request(
+                    "/auth/register",
+                    method="POST",
+                    body={"username": usuario, "email": email, "password": senha},
+                )
+                session["api_token"] = payload["access_token"]
+                update_backend_session_user(payload["user"])
+                get_backend_snapshot(force=True)
+                flash(get_texts("pt-BR")["account_created"], "success")
+                return redirect(url_for("index"))
+            except ValueError as exc:
+                error = str(exc) or TRANSLATIONS["pt-BR"]["user_exists"]
+            except ConnectionError:
+                error = "Nao foi possivel conectar ao backend agora."
             return render_template("cadastro_v3.html", error=error)
 
         conn = conectar()
@@ -1558,6 +1788,30 @@ def add():
     categoria_nome = get_category_name(session["user"], categoria_id)
     conta_nome = get_account_name(session["user"], conta_id)
 
+    if backend_mode_enabled():
+        try:
+            backend_api_request(
+                "/transactions",
+                method="POST",
+                token=get_backend_token(),
+                body={
+                    "description": request.form.get("descricao", "").strip(),
+                    "value": valor,
+                    "type": request.form.get("tipo", "despesa"),
+                    "date": request.form.get("data", ""),
+                    "account_id": conta_id,
+                    "category_id": categoria_id,
+                },
+            )
+            refresh_backend_me()
+            get_backend_snapshot(force=True)
+            flash(get_texts(get_settings(session["user"])["idioma"])["transaction_created"], "success")
+        except ValueError as exc:
+            flash(str(exc) or get_texts(language)["premium_feature_message"], "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("index"))
+
     conn = conectar()
     c = conn.cursor()
     c.execute(
@@ -1588,6 +1842,50 @@ def add():
 @app.route("/editar/<int:item_id>", methods=["GET", "POST"])
 @login_required
 def editar(item_id):
+    if backend_mode_enabled():
+        dado = next((row for row in fetch_transactions(session["user"]) if row["id"] == item_id), None)
+        if not dado:
+            flash(get_texts(get_settings(session["user"])["idioma"])["not_found"], "error")
+            return redirect(url_for("index"))
+
+        if request.method == "POST":
+            try:
+                valor = parse_amount(request.form.get("valor"))
+            except ValueError:
+                flash(get_texts(get_settings(session["user"])["idioma"])["invalid_amount"], "error")
+                return redirect(url_for("editar", item_id=item_id))
+
+            try:
+                backend_api_request(
+                    f"/transactions/{item_id}",
+                    method="PUT",
+                    token=get_backend_token(),
+                    body={
+                        "description": request.form.get("descricao", "").strip(),
+                        "value": valor,
+                        "type": request.form.get("tipo", "despesa"),
+                        "date": request.form.get("data", ""),
+                        "account_id": parse_optional_int(request.form.get("conta_id")),
+                        "category_id": parse_optional_int(request.form.get("categoria_id")),
+                    },
+                )
+                get_backend_snapshot(force=True)
+                flash(get_texts(get_settings(session["user"])["idioma"])["transaction_updated"], "success")
+                return redirect(url_for("index"))
+            except ValueError as exc:
+                flash(str(exc) or "Erro no backend.", "error")
+                return redirect(url_for("editar", item_id=item_id))
+            except ConnectionError:
+                flash("Nao foi possivel conectar ao backend agora.", "error")
+                return redirect(url_for("editar", item_id=item_id))
+
+        return render_template(
+            "editar_v3.html",
+            dado=dado,
+            categorias=get_user_categories(session["user"]),
+            contas=get_user_accounts(session["user"]),
+        )
+
     conn = conectar()
     c = conn.cursor()
     c.execute(
@@ -1649,6 +1947,17 @@ def editar(item_id):
 @app.route("/delete/<int:item_id>", methods=["POST"])
 @login_required
 def delete(item_id):
+    if backend_mode_enabled():
+        try:
+            backend_api_request(f"/transactions/{item_id}", method="DELETE", token=get_backend_token())
+            get_backend_snapshot(force=True)
+            flash(get_texts(get_settings(session["user"])["idioma"])["transaction_deleted"], "success")
+        except ValueError as exc:
+            flash(str(exc) or "Erro no backend.", "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("index"))
+
     conn = conectar()
     c = conn.cursor()
     c.execute("DELETE FROM movimentacoes WHERE id=? AND usuario=?", (item_id, session["user"]))
@@ -1705,14 +2014,31 @@ def planos():
 @app.route("/planos/<plan_key>", methods=["POST"])
 @login_required
 def alterar_plano(plan_key):
-    if PUBLIC_BETA_MODE:
-        flash(f"A beta publica do {APP_DISPLAY_NAME} funciona apenas no plano gratuito nesta fase.", "info")
-        return redirect(url_for("planos"))
-
     if plan_key not in PLANS:
         return redirect(url_for("planos"))
 
     user = session["user"]
+    if backend_mode_enabled():
+        try:
+            payload = backend_api_request(
+                "/me/plan",
+                method="PATCH",
+                token=get_backend_token(),
+                body={"plan": plan_key},
+            )
+            update_backend_session_user(payload)
+            get_backend_snapshot(force=True)
+            flash(f"{get_texts(get_settings(user)['idioma'])['current_plan']}: {PLANS[plan_key]['name']}", "success")
+        except ValueError as exc:
+            flash(str(exc) or "Erro ao alterar o plano.", "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("planos"))
+
+    if PUBLIC_BETA_MODE:
+        flash(f"A beta publica do {APP_DISPLAY_NAME} funciona apenas no plano gratuito nesta fase.", "info")
+        return redirect(url_for("planos"))
+
     settings = get_settings(user)
     moeda = settings["moeda"] if PLANS[plan_key]["allow_multi_currency"] else "BRL"
     alerta_limite = settings.get("alerta_limite", 0) if PLANS[plan_key]["allow_alerts"] else 0
@@ -1756,6 +2082,22 @@ def criar_categoria():
     plan_error = enforce_free_plan_limit(user, "color", settings["idioma"], cor)
     if plan_error:
         flash(plan_error, "error")
+        return redirect(url_for("organizacao"))
+
+    if backend_mode_enabled():
+        try:
+            backend_api_request(
+                "/categories",
+                method="POST",
+                token=get_backend_token(),
+                body={"name": nome, "color": cor},
+            )
+            get_backend_snapshot(force=True)
+            flash(texts["category_created"], "success")
+        except ValueError as exc:
+            flash(str(exc) or texts["category_exists"], "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
         return redirect(url_for("organizacao"))
 
     conn = conectar()
@@ -1871,6 +2213,22 @@ def editar_categoria(categoria_id):
         flash(plan_error, "error")
         return redirect(url_for("organizacao"))
 
+    if backend_mode_enabled():
+        try:
+            backend_api_request(
+                f"/categories/{categoria_id}",
+                method="PUT",
+                token=get_backend_token(),
+                body={"name": nome, "color": cor},
+            )
+            get_backend_snapshot(force=True)
+            flash(texts["category_updated"], "success")
+        except ValueError as exc:
+            flash(str(exc) or texts["category_exists"], "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("organizacao"))
+
     conn = conectar()
     c = conn.cursor()
     try:
@@ -1906,6 +2264,17 @@ def editar_categoria(categoria_id):
 def excluir_categoria(categoria_id):
     user = session["user"]
     texts = get_texts(get_settings(user)["idioma"])
+    if backend_mode_enabled():
+        try:
+            backend_api_request(f"/categories/{categoria_id}", method="DELETE", token=get_backend_token())
+            get_backend_snapshot(force=True)
+            flash(texts["category_deleted"], "success")
+        except ValueError as exc:
+            flash(str(exc) or "Erro ao excluir categoria.", "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("organizacao"))
+
     conn = conectar()
     c = conn.cursor()
     c.execute("SELECT nome FROM categorias WHERE id=? AND usuario=?", (categoria_id, user))
@@ -1944,6 +2313,22 @@ def criar_conta():
         flash(plan_error, "error")
         return redirect(url_for("organizacao"))
 
+    if backend_mode_enabled():
+        try:
+            backend_api_request(
+                "/accounts",
+                method="POST",
+                token=get_backend_token(),
+                body={"name": nome, "kind": tipo},
+            )
+            get_backend_snapshot(force=True)
+            flash(texts["account_created_item"], "success")
+        except ValueError as exc:
+            flash(str(exc) or texts["account_exists"], "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("organizacao"))
+
     conn = conectar()
     c = conn.cursor()
     try:
@@ -1977,6 +2362,22 @@ def editar_conta(conta_id):
 
     if tipo not in {"wallet", "bank", "credit_card", "savings"}:
         tipo = "bank"
+
+    if backend_mode_enabled():
+        try:
+            backend_api_request(
+                f"/accounts/{conta_id}",
+                method="PUT",
+                token=get_backend_token(),
+                body={"name": nome, "kind": tipo},
+            )
+            get_backend_snapshot(force=True)
+            flash(texts["account_updated"], "success")
+        except ValueError as exc:
+            flash(str(exc) or texts["account_exists"], "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("organizacao"))
 
     conn = conectar()
     c = conn.cursor()
@@ -2013,6 +2414,17 @@ def editar_conta(conta_id):
 def excluir_conta(conta_id):
     user = session["user"]
     texts = get_texts(get_settings(user)["idioma"])
+    if backend_mode_enabled():
+        try:
+            backend_api_request(f"/accounts/{conta_id}", method="DELETE", token=get_backend_token())
+            get_backend_snapshot(force=True)
+            flash(texts["account_deleted"], "success")
+        except ValueError as exc:
+            flash(str(exc) or "Erro ao excluir conta.", "error")
+        except ConnectionError:
+            flash("Nao foi possivel conectar ao backend agora.", "error")
+        return redirect(url_for("organizacao"))
+
     conn = conectar()
     c = conn.cursor()
     c.execute("SELECT nome FROM contas WHERE id=? AND usuario=?", (conta_id, user))
@@ -2052,6 +2464,8 @@ def health():
         "mode": "beta-publica",
         "database_backend": DB_BACKEND,
         "database_path": str(DB_PATH),
+        "backend_mode": backend_mode_enabled(),
+        "backend_url": BACKEND_API_URL or None,
     }
 
 

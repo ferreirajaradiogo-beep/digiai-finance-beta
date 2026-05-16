@@ -30,8 +30,10 @@ Esta beta agora trabalha com dois modos:
 
 - `SQLite` local para desenvolvimento
 - `PostgreSQL` para deploy via `DATABASE_URL`
+- `Backend API` compartilhado com app e futuras versões, quando `NOTAFACIL_BACKEND_URL` estiver configurada
 
 Se `DATABASE_URL` estiver configurada, o app usa Postgres automaticamente.
+Se `NOTAFACIL_BACKEND_URL` estiver configurada, o site passa a usar a mesma conta, o mesmo plano e os mesmos dados do backend oficial.
 
 ## E-mail institucional
 
@@ -55,6 +57,7 @@ Importante: a criacao real da caixa de e-mail precisa ser feita no seu provedor 
 ## Execucao local
 
 ```powershell
+$env:NOTAFACIL_BACKEND_URL="http://127.0.0.1:8000"
 cd "C:\Users\ferre\OneDrive\Desktop\PROJETOS\CONTROLE DE DESPESA\NOTE NOVO\FINANCEIRO_BETA_WEB"
 python app_pwa.py
 ```
@@ -62,6 +65,14 @@ python app_pwa.py
 Abrir:
 
 - `http://127.0.0.1:5000`
+
+Para rodar no modo integrado com a API, suba o backend antes:
+
+```powershell
+cd "C:\Users\ferre\OneDrive\Desktop\PROJETOS\CONTROLE DE DESPESA\NOTE NOVO\NOTAFACIL_BACKEND"
+.\.venv\Scripts\Activate.ps1
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
 ## Rotas novas da beta
 
