@@ -31,7 +31,7 @@ window.addEventListener("appinstalled", () => {
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js?v=beta-2").then((registration) => {
+        navigator.serviceWorker.register("/service-worker.js?v=beta-3").then((registration) => {
             registration.update().catch(() => {});
         }).catch(() => {});
     });
