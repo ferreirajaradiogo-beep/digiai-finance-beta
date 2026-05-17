@@ -46,7 +46,7 @@ app.config.update(
 )
 
 BASE_DIR = Path(__file__).resolve().parent
-APP_DISPLAY_NAME = os.environ.get("NOTAFACIL_APP_NAME", "DigiAI Finance")
+APP_DISPLAY_NAME = os.environ.get("NOTAFACIL_APP_NAME", "DiGiaI Caixa")
 APP_TAGLINE = os.environ.get("NOTAFACIL_APP_TAGLINE", "Controle financeiro pessoal inteligente")
 COMPANY_NAME = os.environ.get("NOTAFACIL_COMPANY_NAME", "DigiAI")
 SUPPORT_EMAIL = os.environ.get("NOTAFACIL_SUPPORT_EMAIL", "digiai.oficial@gmail.com")
@@ -124,7 +124,7 @@ PAID_THEME_OPTIONS = FREE_THEME_OPTIONS + [
 
 TRANSLATIONS = {
     "pt-BR": {
-        "app_title": "NotaFácil",
+        "app_title": "DiGiaI Caixa",
         "dashboard": "Dashboard",
         "settings": "Configurações",
         "management": "Categorias e contas",
@@ -271,7 +271,7 @@ TRANSLATIONS = {
         "assistant_current_month": "Mês atual",
     },
     "en-US": {
-        "app_title": "NotaFácil",
+        "app_title": "DiGiaI Caixa",
         "dashboard": "Dashboard",
         "settings": "Settings",
         "management": "Categories and accounts",
@@ -418,7 +418,7 @@ TRANSLATIONS = {
         "assistant_current_month": "Current month",
     },
     "es-ES": {
-        "app_title": "NotaFácil",
+        "app_title": "DiGiaI Caixa",
         "dashboard": "Panel",
         "settings": "Configuración",
         "management": "Categorías y cuentas",
@@ -1795,7 +1795,7 @@ def assistente_financeiro_api():
     )
     assistant = build_assistant_payload(user, settings, data_inicial, data_final)
     return {
-        "app": "NotaFácil",
+        "app": "DiGiaI Caixa",
         "feature": "Assistente Financeiro",
         "provider": assistant["provider"],
         "period": assistant["snapshot"]["period"],

@@ -15,7 +15,7 @@ services:
       - key: NOTAFACIL_URL_SCHEME
         value: "https"
       - key: NOTAFACIL_APP_NAME
-        value: DigiAI Finance
+        value: DiGiaI Caixa
       - key: NOTAFACIL_APP_TAGLINE
         value: Controle financeiro pessoal inteligente
       - key: NOTAFACIL_COMPANY_NAME
