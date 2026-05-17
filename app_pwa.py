@@ -55,7 +55,7 @@ DB_PATH = Path(os.environ.get("NOTAFACIL_DB_PATH", str(BASE_DIR / "financeiro_be
 BACKUP_DIR = Path(os.environ.get("NOTAFACIL_BACKUP_DIR", str(BASE_DIR / "backups"))).expanduser()
 BACKEND_API_URL = (os.environ.get("NOTAFACIL_BACKEND_URL", "") or "").strip().rstrip("/")
 
-DEFAULT_SETTINGS = {"idioma": "pt-BR", "moeda": "BRL", "tema": "dark", "plano": "free"}
+DEFAULT_SETTINGS = {"idioma": "pt-BR", "moeda": "BRL", "tema": "black-ocean", "plano": "free"}
 FREE_ALLOWED_COLORS = ["#58d5ff", "#7cf0bb", "#ffab7a", "#ff7c93"]
 PAID_COLOR_PRESETS = [
     "#58d5ff",
@@ -107,20 +107,86 @@ CURRENCY_OPTIONS = [
     ("EUR", "Euro (EUR)"),
     ("GBP", "Pound Sterling (GBP)"),
 ]
-FREE_THEME_OPTIONS = [
-    ("dark", "Escuro"),
-    ("light", "Claro"),
+BACKGROUND_THEME_OPTIONS = [
+    ("black", "Preto"),
+    ("white", "Branco"),
+]
+FREE_ACCENT_THEME_OPTIONS = [
     ("ocean", "Ocean"),
 ]
-PAID_THEME_OPTIONS = FREE_THEME_OPTIONS + [
+PAID_ACCENT_THEME_OPTIONS = FREE_ACCENT_THEME_OPTIONS + [
     ("graphite", "Graphite"),
-    ("forest", "Forest"),
-    ("sunset", "Sunset"),
-    ("aurora", "Aurora"),
     ("ember", "Ember"),
     ("royal", "Royal"),
     ("sand", "Sand"),
+    ("mint", "Mint"),
 ]
+
+ACCENT_THEME_META = {
+    "ocean": {"label": "Ocean", "premium": False},
+    "graphite": {"label": "Graphite", "premium": True},
+    "ember": {"label": "Ember", "premium": True},
+    "royal": {"label": "Royal", "premium": True},
+    "sand": {"label": "Sand", "premium": True},
+    "mint": {"label": "Mint", "premium": True},
+}
+
+
+def compose_theme_key(background, accent):
+    background_key = str(background or "black").strip().lower()
+    accent_key = str(accent or "ocean").strip().lower()
+    allowed_backgrounds = {key for key, _ in BACKGROUND_THEME_OPTIONS}
+    allowed_accents = set(ACCENT_THEME_META)
+    if background_key not in allowed_backgrounds:
+        background_key = "black"
+    if accent_key not in allowed_accents:
+        accent_key = "ocean"
+    return f"{background_key}-{accent_key}"
+
+
+def split_theme_key(value):
+    normalized = str(value or "").strip().lower()
+    legacy_map = {
+        "dark": ("black", "ocean"),
+        "light": ("white", "ocean"),
+        "black": ("black", "ocean"),
+        "white": ("white", "ocean"),
+        "ocean": ("black", "ocean"),
+        "graphite": ("black", "graphite"),
+        "forest": ("black", "mint"),
+        "sunset": ("black", "ember"),
+        "aurora": ("black", "royal"),
+        "ember": ("black", "ember"),
+        "royal": ("black", "royal"),
+        "sand": ("black", "sand"),
+        "mint": ("black", "mint"),
+    }
+    if normalized in legacy_map:
+        return legacy_map[normalized]
+    if "-" in normalized:
+        background_key, accent_key = normalized.split("-", 1)
+        return (
+            background_key if background_key in {key for key, _ in BACKGROUND_THEME_OPTIONS} else "black",
+            accent_key if accent_key in ACCENT_THEME_META else "ocean",
+        )
+    return ("black", "ocean")
+
+
+def normalize_theme_key(value, plan_key="free"):
+    background_key, accent_key = split_theme_key(value)
+    if plan_key != "pro" and accent_key != "ocean":
+        accent_key = "ocean"
+    return compose_theme_key(background_key, accent_key)
+
+
+def get_background_theme_class(theme_key):
+    background_key, _ = split_theme_key(theme_key)
+    return "light" if background_key == "white" else "dark"
+
+
+def get_accent_theme_class(theme_key):
+    _, accent_key = split_theme_key(theme_key)
+    return accent_key
 
 TRANSLATIONS = {
     "pt-BR": {
@@ -972,7 +1038,7 @@ def get_settings(usuario):
         return {
             "idioma": backend_user.get("language", DEFAULT_SETTINGS["idioma"]),
             "moeda": backend_user.get("currency", DEFAULT_SETTINGS["moeda"]),
-            "tema": backend_user.get("theme_key", DEFAULT_SETTINGS["tema"]),
+            "tema": normalize_theme_key(backend_user.get("theme_key", DEFAULT_SETTINGS["tema"]), backend_user.get("plan", "free")),
             "plano": backend_user.get("plan", "free"),
             "alerta_limite": float(backend_user.get("monthly_limit") or 0),
         }
@@ -987,18 +1053,20 @@ def get_settings(usuario):
     return {
         "idioma": row["idioma"],
         "moeda": row["moeda"],
-        "tema": row["tema"],
+        "tema": normalize_theme_key(row["tema"], row["plano"] if row["plano"] in PLANS else "free"),
         "plano": row["plano"] if row["plano"] in PLANS else "free",
         "alerta_limite": float(row["alerta_limite"] or 0),
     }
 
 
 def save_settings(usuario, idioma, moeda, tema, plano=None, alerta_limite=None):
+    normalized_plan = plano if plano in PLANS else get_plan_key(usuario)
+    normalized_theme = normalize_theme_key(tema, normalized_plan)
     if backend_mode_enabled():
         payload = {
             "language": idioma,
             "currency": moeda,
-            "theme_key": tema,
+            "theme_key": normalized_theme,
             "monthly_limit": float(alerta_limite or 0),
         }
         response = backend_api_request("/me/settings", method="PATCH", token=get_backend_token(), body=payload)
@@ -1008,6 +1076,7 @@ def save_settings(usuario, idioma, moeda, tema, plano=None, alerta_limite=None):
         return
     if plano is None:
         plano = get_plan_key(usuario)
+    plano = normalized_plan
     if alerta_limite is None:
         alerta_limite = get_settings(usuario).get("alerta_limite", 0)
     conn = conectar()
@@ -1023,7 +1092,7 @@ def save_settings(usuario, idioma, moeda, tema, plano=None, alerta_limite=None):
             plano=excluded.plano,
             alerta_limite=excluded.alerta_limite
         """,
-        (usuario, idioma, moeda, tema, plano, alerta_limite),
+        (usuario, idioma, moeda, normalized_theme, plano, alerta_limite),
     )
     conn.commit()
     conn.close()
@@ -1047,11 +1116,20 @@ def get_plan_config(plan_key):
 
 
 def get_theme_options_for_plan(plan_key):
+    accent_options = get_accent_theme_options_for_plan(plan_key)
+    return [(compose_theme_key(background_key, accent_key), f"{background_label} + {accent_label}") for background_key, background_label in BACKGROUND_THEME_OPTIONS for accent_key, accent_label in accent_options]
+
+
+def get_background_theme_options():
+    return BACKGROUND_THEME_OPTIONS
+
+
+def get_accent_theme_options_for_plan(plan_key):
     if backend_mode_enabled():
-        return PAID_THEME_OPTIONS if plan_key == "pro" else FREE_THEME_OPTIONS
+        return PAID_ACCENT_THEME_OPTIONS if plan_key == "pro" else FREE_ACCENT_THEME_OPTIONS
     if PUBLIC_BETA_MODE:
-        return FREE_THEME_OPTIONS
-    return PAID_THEME_OPTIONS if plan_key == "pro" else FREE_THEME_OPTIONS
+        return FREE_ACCENT_THEME_OPTIONS
+    return PAID_ACCENT_THEME_OPTIONS if plan_key == "pro" else FREE_ACCENT_THEME_OPTIONS
 
 
 def is_paid_user(usuario):
@@ -1550,9 +1628,11 @@ def inject_layout_context():
     account_email = backend_user.get("email", "") if isinstance(backend_user, dict) else ""
     account_is_online = bool(user and backend_mode_enabled() and get_backend_token())
     settings["plano"] = active_plan_key
+    settings["tema"] = normalize_theme_key(settings.get("tema"), active_plan_key)
     allowed_theme_values = {key for key, _ in get_theme_options_for_plan(active_plan_key)}
     if settings.get("tema") not in allowed_theme_values:
-        settings["tema"] = "ocean" if "ocean" in allowed_theme_values else DEFAULT_SETTINGS["tema"]
+        settings["tema"] = normalize_theme_key(DEFAULT_SETTINGS["tema"], active_plan_key)
+    selected_background_theme, selected_accent_theme = split_theme_key(settings["tema"])
     account_type_options = [
         ("wallet", texts["wallet"]),
         ("bank", texts["bank"]),
@@ -1577,8 +1657,12 @@ def inject_layout_context():
         "language_options": LANGUAGE_OPTIONS,
         "currency_options": CURRENCY_OPTIONS,
         "theme_options": get_theme_options_for_plan(active_plan_key),
-        "free_theme_options": FREE_THEME_OPTIONS,
-        "paid_theme_options": PAID_THEME_OPTIONS,
+        "background_theme_options": get_background_theme_options(),
+        "accent_theme_options": get_accent_theme_options_for_plan(active_plan_key),
+        "selected_background_theme": selected_background_theme,
+        "selected_accent_theme": selected_accent_theme,
+        "theme_background_class": get_background_theme_class(settings["tema"]),
+        "theme_accent_class": get_accent_theme_class(settings["tema"]),
         "account_type_options": account_type_options,
         "account_username": user or "",
         "account_email": account_email,
@@ -2052,7 +2136,9 @@ def configuracoes():
 
         idioma = request.form.get("idioma", DEFAULT_SETTINGS["idioma"])
         moeda = request.form.get("moeda", DEFAULT_SETTINGS["moeda"])
-        tema = request.form.get("tema", DEFAULT_SETTINGS["tema"])
+        background_theme = request.form.get("background_theme", split_theme_key(DEFAULT_SETTINGS["tema"])[0])
+        accent_theme = request.form.get("accent_theme", split_theme_key(DEFAULT_SETTINGS["tema"])[1])
+        tema = compose_theme_key(background_theme, accent_theme)
         allowed_themes = {item[0] for item in get_theme_options_for_plan(get_plan_key(user))}
 
         if idioma not in {item[0] for item in LANGUAGE_OPTIONS}:
@@ -2060,7 +2146,7 @@ def configuracoes():
         if moeda not in {item[0] for item in CURRENCY_OPTIONS}:
             moeda = DEFAULT_SETTINGS["moeda"]
         if tema not in allowed_themes:
-            tema = DEFAULT_SETTINGS["tema"]
+            tema = normalize_theme_key(DEFAULT_SETTINGS["tema"], get_plan_key(user))
 
         if not get_plan_config(get_plan_key(user))["allow_multi_currency"]:
             moeda = "BRL"
@@ -2141,7 +2227,7 @@ def alterar_plano(plan_key):
     moeda = settings["moeda"] if PLANS[plan_key]["allow_multi_currency"] else "BRL"
     alerta_limite = settings.get("alerta_limite", 0) if PLANS[plan_key]["allow_alerts"] else 0
     allowed_themes = {item[0] for item in get_theme_options_for_plan(plan_key)}
-    tema = settings["tema"] if settings["tema"] in allowed_themes else DEFAULT_SETTINGS["tema"]
+    tema = settings["tema"] if settings["tema"] in allowed_themes else normalize_theme_key(DEFAULT_SETTINGS["tema"], plan_key)
     save_settings(user, settings["idioma"], moeda, tema, plan_key, alerta_limite)
     write_local_backup(user)
     flash(f"{get_texts(settings['idioma'])['current_plan']}: {PLANS[plan_key]['name']}", "success")

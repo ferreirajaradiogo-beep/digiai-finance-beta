@@ -3,35 +3,55 @@
 {% block content %}
 <section class="page-hero-inline">
     <div>
-        <span class="eyebrow">Beta publica</span>
-        <h2>Versao gratuita para validacao</h2>
-        <p>Esta edicao foi separada para publicar sem cobranca, com foco em testes reais, estabilidade e feedback dos primeiros usuarios.</p>
+        <span class="eyebrow">Planos</span>
+        <h2>Free e Pro com identidade padronizada</h2>
+        <p>Os planos agora seguem a mesma base do backend oficial. Fundo e cor de destaque ficam separados para manter a experiencia coerente entre site, app e programa.</p>
     </div>
 </section>
 
-<section class="pricing-grid-bank pricing-grid-single">
-    <article class="pricing-card-bank featured active">
+<section class="pricing-grid-bank">
+    <article class="pricing-card-bank {% if plan_key == 'free' %}featured active{% endif %}">
         <div class="pricing-card-head">
             <div>
-                <span class="eyebrow light">Plano ativo</span>
+                <span class="eyebrow light">Plano atual</span>
                 <h3>{{ app_display_name }} Free</h3>
             </div>
             <span class="pricing-value">R$ 0</span>
         </div>
-        <p>Sem pagamento nesta fase. Ideal para publicar, validar e evoluir.</p>
+        <p>Base enxuta para usar o sistema com 1 conta e tema livre entre fundo preto ou branco com acento Ocean.</p>
         <ul>
             <li>20 lancamentos por mes</li>
             <li>1 conta</li>
             <li>10 categorias</li>
-            <li>Temas Preto, Branco e Ocean</li>
-            <li>Exportacao e backup local</li>
-            <li>Assistente financeiro</li>
-            <li>Politica e termos incluidos</li>
+            <li>Fundo Preto ou Branco</li>
+            <li>Cor de destaque Ocean</li>
+            <li>Backup e exportacao basica</li>
         </ul>
-        <div class="beta-note-box">
-            <strong>O que fica para a versao completa</strong>
-            <p>Pagamento, plano Pro, mais temas, multimoeda avancada, alertas premium e sincronizacao mais robusta entre app, site e programa.</p>
+        <form method="POST" action="{{ url_for('alterar_plano', plan_key='free') }}">
+            <button type="submit" class="bank-primary-button full">{% if plan_key == 'free' %}Selecionado{% else %}Ativar Free{% endif %}</button>
+        </form>
+    </article>
+
+    <article class="pricing-card-bank {% if plan_key == 'pro' %}featured active{% endif %}">
+        <div class="pricing-card-head">
+            <div>
+                <span class="eyebrow light">Plano completo</span>
+                <h3>{{ app_display_name }} Pro</h3>
+            </div>
+            <span class="pricing-value">R$ 20/mes</span>
         </div>
+        <p>Plano liberado para multi-contas, multimoeda e paleta completa de acentos sem mexer no fundo base escolhido.</p>
+        <ul>
+            <li>Lancamentos ilimitados</li>
+            <li>Multi-contas</li>
+            <li>Graphite, Ember, Royal, Sand e Mint</li>
+            <li>Moeda variavel</li>
+            <li>Alertas e relatorios avancados</li>
+            <li>Mais liberdade visual com o mesmo fundo</li>
+        </ul>
+        <form method="POST" action="{{ url_for('alterar_plano', plan_key='pro') }}">
+            <button type="submit" class="bank-primary-button full">{% if plan_key == 'pro' %}Selecionado{% else %}Ativar Pro{% endif %}</button>
+        </form>
     </article>
 </section>
 {% endblock %}

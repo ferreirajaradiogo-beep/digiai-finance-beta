@@ -130,16 +130,32 @@
             {% endif %}
 
             <div>
-                <span class="field-inline-label">{{ texts.theme }}</span>
-                <p class="section-helper">{{ texts.premium_themes_help }}</p>
+                <span class="field-inline-label">Cor de fundo</span>
+                <p class="section-helper">Escolha entre base preta ou branca para o app e o site.</p>
             </div>
 
             <div class="theme-grid-bank">
-                {% for value, label in theme_options %}
-                <label class="theme-card-bank theme-{{ value }}">
-                    <input type="radio" name="tema" value="{{ value }}" {% if current_settings.tema == value %}checked{% endif %}>
-                    <span class="theme-card-preview"></span>
+                {% for value, label in background_theme_options %}
+                <label class="theme-card-bank bg-{{ value }}">
+                    <input type="radio" name="background_theme" value="{{ value }}" {% if selected_background_theme == value %}checked{% endif %}>
+                    <span class="theme-card-preview theme-card-preview-bg"></span>
                     <strong>{{ label }}</strong>
+                </label>
+                {% endfor %}
+            </div>
+
+            <div>
+                <span class="field-inline-label">Cor de destaque</span>
+                <p class="section-helper">Acentos como Ocean e Graphite agora ficam separados do fundo.</p>
+            </div>
+
+            <div class="theme-grid-bank">
+                {% for value, label in accent_theme_options %}
+                <label class="theme-card-bank accent-{{ value }}">
+                    <input type="radio" name="accent_theme" value="{{ value }}" {% if selected_accent_theme == value %}checked{% endif %}>
+                    <span class="theme-card-preview theme-card-preview-accent"></span>
+                    <strong>{{ label }}</strong>
+                    <small>{% if value == 'ocean' %}{{ texts.free_plan }}{% else %}{{ texts.paid_plan }}{% endif %}</small>
                 </label>
                 {% endfor %}
             </div>

@@ -51,59 +51,46 @@ body.theme-light {
     --hero-gradient-soft: linear-gradient(145deg, rgba(20, 94, 255, 0.12), rgba(84, 184, 255, 0.08));
 }
 
-body.theme-ocean {
+body.theme-ocean,
+body.accent-ocean {
     --accent: #1562ff;
     --accent-2: #49c1ff;
     --accent-soft: rgba(21, 98, 255, 0.14);
     --hero-gradient: linear-gradient(135deg, #0b53f0 0%, #1974ff 44%, #43b8ff 100%);
 }
-body.theme-graphite {
+body.theme-graphite,
+body.accent-graphite {
     --accent: #57627d;
     --accent-2: #8ea4cb;
     --accent-soft: rgba(87, 98, 125, 0.16);
     --hero-gradient: linear-gradient(135deg, #394358 0%, #57627d 46%, #95a7c4 100%);
-    --bg: #0c111b;
-    --bg-2: #171d29;
 }
-body.theme-forest {
-    --accent: #149d6f;
-    --accent-2: #47d7a0;
-    --accent-soft: rgba(20, 157, 111, 0.16);
-    --hero-gradient: linear-gradient(135deg, #0d7c59 0%, #149d6f 44%, #47d7a0 100%);
-    --bg: #071a17;
-    --bg-2: #0d2721;
-}
-body.theme-sunset {
-    --accent: #ff6f61;
-    --accent-2: #ffae75;
-    --accent-soft: rgba(255, 111, 97, 0.16);
-    --hero-gradient: linear-gradient(135deg, #ff6f61 0%, #ff8d63 44%, #ffb074 100%);
-}
-body.theme-aurora {
-    --accent: #6f6fff;
-    --accent-2: #84d8ff;
-    --accent-soft: rgba(111, 111, 255, 0.16);
-    --hero-gradient: linear-gradient(135deg, #5d67ff 0%, #7d7bff 45%, #84d8ff 100%);
-}
-body.theme-ember {
+body.theme-ember,
+body.accent-ember {
     --accent: #ff8a4d;
     --accent-2: #ffc070;
     --accent-soft: rgba(255, 138, 77, 0.16);
     --hero-gradient: linear-gradient(135deg, #ff7a3d 0%, #ff9952 44%, #ffc070 100%);
 }
-body.theme-royal {
+body.theme-royal,
+body.accent-royal {
     --accent: #7e5cff;
     --accent-2: #b89aff;
     --accent-soft: rgba(126, 92, 255, 0.16);
     --hero-gradient: linear-gradient(135deg, #6c4eff 0%, #8665ff 44%, #b89aff 100%);
 }
-body.theme-sand {
+body.theme-sand,
+body.accent-sand {
     --accent: #d19d4d;
     --accent-2: #f0cb79;
     --accent-soft: rgba(209, 157, 77, 0.16);
     --hero-gradient: linear-gradient(135deg, #b98535 0%, #d19d4d 44%, #f0cb79 100%);
-    --bg: #17120a;
-    --bg-2: #241b0f;
+}
+body.accent-mint {
+    --accent: #18b889;
+    --accent-2: #7cf7c4;
+    --accent-soft: rgba(24, 184, 137, 0.16);
+    --hero-gradient: linear-gradient(135deg, #0d8d69 0%, #18b889 44%, #7cf7c4 100%);
 }
 
 .brand-footer-links {
@@ -1171,16 +1158,14 @@ select:focus {
     background: var(--hero-gradient);
 }
 
-.theme-card-bank.theme-light .theme-card-preview { background: linear-gradient(135deg, #ffffff, #d9e5ff); }
-.theme-card-bank.theme-dark .theme-card-preview { background: linear-gradient(135deg, #081120, #1562ff); }
-.theme-card-bank.theme-ocean .theme-card-preview { background: linear-gradient(135deg, #0b53f0, #49c1ff); }
-.theme-card-bank.theme-graphite .theme-card-preview { background: linear-gradient(135deg, #2f364a, #6d7792); }
-.theme-card-bank.theme-forest .theme-card-preview { background: linear-gradient(135deg, #0f6c4f, #49d8a2); }
-.theme-card-bank.theme-sunset .theme-card-preview { background: linear-gradient(135deg, #ff6f61, #ffb074); }
-.theme-card-bank.theme-aurora .theme-card-preview { background: linear-gradient(135deg, #6f6fff, #84d8ff); }
-.theme-card-bank.theme-ember .theme-card-preview { background: linear-gradient(135deg, #ff8a4d, #ffc070); }
-.theme-card-bank.theme-royal .theme-card-preview { background: linear-gradient(135deg, #7e5cff, #b89aff); }
-.theme-card-bank.theme-sand .theme-card-preview { background: linear-gradient(135deg, #c99544, #f0cb79); }
+.theme-card-bank.bg-black .theme-card-preview-bg { background: linear-gradient(135deg, #081120, #1b2f57); }
+.theme-card-bank.bg-white .theme-card-preview-bg { background: linear-gradient(135deg, #ffffff, #d9e5ff); }
+.theme-card-bank.accent-ocean .theme-card-preview-accent { background: linear-gradient(135deg, #0b53f0, #49c1ff); }
+.theme-card-bank.accent-graphite .theme-card-preview-accent { background: linear-gradient(135deg, #394358, #95a7c4); }
+.theme-card-bank.accent-ember .theme-card-preview-accent { background: linear-gradient(135deg, #ff7a3d, #ffc070); }
+.theme-card-bank.accent-royal .theme-card-preview-accent { background: linear-gradient(135deg, #6c4eff, #b89aff); }
+.theme-card-bank.accent-sand .theme-card-preview-accent { background: linear-gradient(135deg, #b98535, #f0cb79); }
+.theme-card-bank.accent-mint .theme-card-preview-accent { background: linear-gradient(135deg, #0d8d69, #7cf7c4); }
 
 .theme-card-bank input:checked ~ strong,
 .theme-card-bank input:checked + .theme-card-preview {
@@ -1190,6 +1175,11 @@ select:focus {
 .theme-card-bank:has(input:checked) {
     border-color: rgba(21, 98, 255, 0.36);
     box-shadow: 0 0 0 4px rgba(21, 98, 255, 0.1);
+}
+
+.theme-card-bank small {
+    color: var(--muted);
+    font-weight: 700;
 }
 
 .profile-hero-modern {
