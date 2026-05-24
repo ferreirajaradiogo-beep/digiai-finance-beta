@@ -146,7 +146,7 @@
 
             <div>
                 <span class="field-inline-label">Cor de destaque</span>
-                <p class="section-helper">Acentos como Ocean e Graphite agora ficam separados do fundo.</p>
+                <p class="section-helper">Acentos como Ocean e Graphite agora ficam separados do fundo e liberados em qualquer plano.</p>
             </div>
 
             <div class="theme-grid-bank">
@@ -155,7 +155,7 @@
                     <input type="radio" name="accent_theme" value="{{ value }}" {% if selected_accent_theme == value %}checked{% endif %}>
                     <span class="theme-card-preview theme-card-preview-accent"></span>
                     <strong>{{ label }}</strong>
-                    <small>{% if value == 'ocean' %}{{ texts.free_plan }}{% else %}{{ texts.paid_plan }}{% endif %}</small>
+                    <small>Livre em qualquer plano</small>
                 </label>
                 {% endfor %}
             </div>

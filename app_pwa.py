@@ -174,8 +174,6 @@ def split_theme_key(value):
 
 def normalize_theme_key(value, plan_key="free"):
     background_key, accent_key = split_theme_key(value)
-    if plan_key != "pro" and accent_key != "ocean":
-        accent_key = "ocean"
     return compose_theme_key(background_key, accent_key)
 
 
@@ -1125,11 +1123,7 @@ def get_background_theme_options():
 
 
 def get_accent_theme_options_for_plan(plan_key):
-    if backend_mode_enabled():
-        return PAID_ACCENT_THEME_OPTIONS if plan_key == "pro" else FREE_ACCENT_THEME_OPTIONS
-    if PUBLIC_BETA_MODE:
-        return FREE_ACCENT_THEME_OPTIONS
-    return PAID_ACCENT_THEME_OPTIONS if plan_key == "pro" else FREE_ACCENT_THEME_OPTIONS
+    return PAID_ACCENT_THEME_OPTIONS
 
 
 def is_paid_user(usuario):
