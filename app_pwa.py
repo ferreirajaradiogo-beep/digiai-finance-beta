@@ -333,6 +333,13 @@ TRANSLATIONS = {
         "assistant_open_api": "Ver endpoint JSON",
         "assistant_overview": "Visão automática do período",
         "assistant_current_month": "Mês atual",
+        "assistant_chat_title": "Pergunte ao assistente",
+        "assistant_chat_placeholder": "Ex.: como sincronizar meu app? qual categoria mais pesa? como mudar de plano?",
+        "assistant_chat_submit": "Perguntar",
+        "assistant_chat_hint": "Posso ajudar com sincronização, plano, senha e leitura do seu mês.",
+        "assistant_answer_title": "Resposta",
+        "assistant_provider_local": "Resposta local",
+        "assistant_provider_openai": "Resposta com IA",
     },
     "en-US": {
         "app_title": "DiGiaI Caixa",
@@ -480,6 +487,13 @@ TRANSLATIONS = {
         "assistant_open_api": "Open JSON endpoint",
         "assistant_overview": "Automatic period overview",
         "assistant_current_month": "Current month",
+        "assistant_chat_title": "Ask the assistant",
+        "assistant_chat_placeholder": "Example: how do I sync my app? which category weighs the most? how do I change plans?",
+        "assistant_chat_submit": "Ask",
+        "assistant_chat_hint": "I can help with sync, plan, password and your monthly financial reading.",
+        "assistant_answer_title": "Answer",
+        "assistant_provider_local": "Local answer",
+        "assistant_provider_openai": "AI answer",
     },
     "es-ES": {
         "app_title": "DiGiaI Caixa",
@@ -627,6 +641,13 @@ TRANSLATIONS = {
         "assistant_open_api": "Ver endpoint JSON",
         "assistant_overview": "Visión automática del período",
         "assistant_current_month": "Mes actual",
+        "assistant_chat_title": "Pregunta al asistente",
+        "assistant_chat_placeholder": "Ej.: como sincronizar mi app? que categoria pesa mas? como cambiar de plan?",
+        "assistant_chat_submit": "Preguntar",
+        "assistant_chat_hint": "Puedo ayudar con sincronización, plan, contraseña y lectura de tu mes.",
+        "assistant_answer_title": "Respuesta",
+        "assistant_provider_local": "Respuesta local",
+        "assistant_provider_openai": "Respuesta con IA",
     },
 }
 
@@ -1589,6 +1610,46 @@ def build_assistant_payload(usuario, settings, data_inicial="", data_final=""):
     )
 
 
+def build_local_assistant_chat_reply(question, assistant_payload):
+    normalized = str(question or "").strip().lower()
+    suggestions = [
+        "Como sincronizar meu app com o site?",
+        "Resumo do meu mes",
+        "Qual categoria mais pesa?",
+    ]
+
+    if any(term in normalized for term in ["sincron", "token", "api", "site", "app", "login"]):
+        answer = (
+            "Use a mesma conta no app e no site, mantendo a URL da API em "
+            "https://notafacil-api.onrender.com. Se aparecer token invalido, "
+            "saia da conta e entre novamente para renovar a sessao."
+        )
+        mode = "account"
+    elif any(term in normalized for term in ["plano", "pro", "free", "gratis", "senha"]):
+        answer = (
+            "O plano da conta vem do backend. Se voce quiser mudar entre Free e Pro, "
+            "faça isso com a conta online conectada. Para senha, use Configuracoes > Acesso da conta."
+        )
+        mode = "help"
+    else:
+        snapshot = assistant_payload["snapshot"]
+        answer = (
+            f"No periodo {snapshot['period']['label']}, voce tem {snapshot['entries_count']} lancamentos, "
+            f"receitas de {format_currency(snapshot['totals']['income'], snapshot['currency'])}, "
+            f"gastos de {format_currency(snapshot['totals']['expense'], snapshot['currency'])} e "
+            f"saldo de {format_currency(snapshot['totals']['balance'], snapshot['currency'])}. "
+            f"A categoria com maior gasto foi {snapshot['top_expense_category']['name']}."
+        )
+        mode = "finance"
+
+    return {
+        "answer": answer,
+        "provider": "local",
+        "mode": mode,
+        "suggestions": suggestions,
+    }
+
+
 def build_backup_payload(usuario):
     settings = get_settings(usuario)
     categorias = get_user_categories(usuario)
@@ -1840,7 +1901,7 @@ def index():
     )
 
 
-@app.route("/assistente")
+@app.route("/assistente", methods=["GET", "POST"])
 @login_required
 def assistente_financeiro():
     user = session["user"]
@@ -1850,10 +1911,37 @@ def assistente_financeiro():
         request.args.get("data_final"),
     )
     assistant = build_assistant_payload(user, settings, data_inicial, data_final)
+    assistant_chat = None
+    assistant_question = ""
+
+    if request.method == "POST":
+        assistant_question = request.form.get("question", "").strip()
+        data_inicial, data_final = resolve_assistant_period(
+            request.form.get("data_inicial"),
+            request.form.get("data_final"),
+        )
+        assistant = build_assistant_payload(user, settings, data_inicial, data_final)
+        if assistant_question:
+            if backend_mode_enabled():
+                try:
+                    assistant_chat = backend_api_request(
+                        "/assistant/chat",
+                        method="POST",
+                        token=get_backend_token(),
+                        body={"question": assistant_question},
+                    )
+                except (ValueError, ConnectionError):
+                    flash("O backend do assistente nao respondeu agora. Vou usar a leitura local do periodo.", "warning")
+                    assistant_chat = build_local_assistant_chat_reply(assistant_question, assistant)
+            else:
+                assistant_chat = build_local_assistant_chat_reply(assistant_question, assistant)
+
     return render_template(
         "assistente_v3.html",
         assistant=assistant,
         filtros={"data_inicial": data_inicial, "data_final": data_final},
+        assistant_chat=assistant_chat,
+        assistant_question=assistant_question,
         assistant_api_url=url_for(
             "assistente_financeiro_api",
             data_inicial=data_inicial,

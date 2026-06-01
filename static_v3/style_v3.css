@@ -1319,6 +1319,45 @@ select:focus {
     margin-top: 8px;
 }
 
+.assistant-chat-card {
+    display: grid;
+    gap: 18px;
+}
+
+.assistant-chat-form {
+    display: grid;
+    gap: 14px;
+}
+
+.assistant-chat-actions {
+    display: grid;
+    gap: 12px;
+}
+
+.assistant-suggestion-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.assistant-badge.suggestion {
+    border: 0;
+    cursor: pointer;
+}
+
+.assistant-chat-answer {
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.assistant-chat-answer p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
 .assistant-status-danger { background: rgba(255, 114, 98, 0.18); color: var(--danger); }
 .assistant-status-warning { background: rgba(255, 191, 85, 0.18); color: var(--warning); }
 .assistant-status-positive { background: rgba(30, 207, 134, 0.18); color: var(--success); }

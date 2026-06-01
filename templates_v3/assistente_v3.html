@@ -13,6 +13,39 @@
     </div>
 </section>
 
+<section class="bank-card assistant-chat-card">
+    <div class="panel-heading">
+        <div>
+            <p class="eyebrow">{{ texts.assistant_chat_title }}</p>
+            <h3>{{ texts.assistant_chat_hint }}</h3>
+        </div>
+    </div>
+    <form method="POST" class="assistant-chat-form">
+        <input type="hidden" name="data_inicial" value="{{ filtros.data_inicial }}">
+        <input type="hidden" name="data_final" value="{{ filtros.data_final }}">
+        <textarea name="question" rows="3" placeholder="{{ texts.assistant_chat_placeholder }}">{{ assistant_question or '' }}</textarea>
+        <div class="assistant-chat-actions">
+            <button type="submit" class="bank-primary-button">{{ texts.assistant_chat_submit }}</button>
+            <div class="assistant-suggestion-row">
+                {% for suggestion in (assistant_chat.suggestions if assistant_chat and assistant_chat.suggestions else ['Como sincronizar meu app com o site?', 'Resumo do meu mes', 'Qual categoria mais pesa?']) %}
+                <button type="submit" name="question" value="{{ suggestion }}" class="assistant-badge suggestion">{{ suggestion }}</button>
+                {% endfor %}
+            </div>
+        </div>
+    </form>
+    {% if assistant_chat %}
+    <div class="assistant-chat-answer">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">{{ texts.assistant_answer_title }}</p>
+                <h3>{{ texts.assistant_provider_openai if assistant_chat.provider == 'openai' else texts.assistant_provider_local }}</h3>
+            </div>
+        </div>
+        <p>{{ assistant_chat.answer }}</p>
+    </div>
+    {% endif %}
+</section>
+
 <section class="bank-card">
     <div class="panel-heading">
         <div>
