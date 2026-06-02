@@ -41,6 +41,9 @@
                 <h3>{{ texts.assistant_provider_openai if assistant_chat.provider == 'openai' else texts.assistant_provider_local }}</h3>
             </div>
         </div>
+        {% if assistant_provider_reason_text %}
+        <p class="assistant-provider-note">{{ assistant_provider_reason_text }}</p>
+        {% endif %}
         <p>{{ assistant_chat.answer }}</p>
     </div>
     {% endif %}

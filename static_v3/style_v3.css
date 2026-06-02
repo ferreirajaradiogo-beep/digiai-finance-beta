@@ -1358,6 +1358,12 @@ select:focus {
     line-height: 1.7;
 }
 
+.assistant-provider-note {
+    margin: 0 0 10px;
+    font-size: 0.92rem;
+    color: var(--accent);
+}
+
 .assistant-status-danger { background: rgba(255, 114, 98, 0.18); color: var(--danger); }
 .assistant-status-warning { background: rgba(255, 191, 85, 0.18); color: var(--warning); }
 .assistant-status-positive { background: rgba(30, 207, 134, 0.18); color: var(--success); }

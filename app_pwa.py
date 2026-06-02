@@ -340,6 +340,8 @@ TRANSLATIONS = {
         "assistant_answer_title": "Resposta",
         "assistant_provider_local": "Resposta local",
         "assistant_provider_openai": "Resposta com IA",
+        "assistant_provider_reason_missing_api_key": "A chave OPENAI_API_KEY ainda nao foi lida pelo backend publicado.",
+        "assistant_provider_reason_local_fallback": "A resposta caiu no modo local de seguranca.",
     },
     "en-US": {
         "app_title": "DiGiaI Caixa",
@@ -494,6 +496,8 @@ TRANSLATIONS = {
         "assistant_answer_title": "Answer",
         "assistant_provider_local": "Local answer",
         "assistant_provider_openai": "AI answer",
+        "assistant_provider_reason_missing_api_key": "The published backend has not picked up OPENAI_API_KEY yet.",
+        "assistant_provider_reason_local_fallback": "The answer fell back to the local safe mode.",
     },
     "es-ES": {
         "app_title": "DiGiaI Caixa",
@@ -648,6 +652,8 @@ TRANSLATIONS = {
         "assistant_answer_title": "Respuesta",
         "assistant_provider_local": "Respuesta local",
         "assistant_provider_openai": "Respuesta con IA",
+        "assistant_provider_reason_missing_api_key": "El backend publicado aun no tomo la OPENAI_API_KEY.",
+        "assistant_provider_reason_local_fallback": "La respuesta cayo al modo local de seguridad.",
     },
 }
 
@@ -1646,8 +1652,17 @@ def build_local_assistant_chat_reply(question, assistant_payload):
         "answer": answer,
         "provider": "local",
         "mode": mode,
+        "provider_reason": "local_fallback",
         "suggestions": suggestions,
     }
+
+
+def get_assistant_provider_reason_text(texts, reason):
+    mapping = {
+        "missing_api_key": texts.get("assistant_provider_reason_missing_api_key", ""),
+        "local_fallback": texts.get("assistant_provider_reason_local_fallback", ""),
+    }
+    return mapping.get(reason, "")
 
 
 def build_backup_payload(usuario):
@@ -1942,6 +1957,7 @@ def assistente_financeiro():
         filtros={"data_inicial": data_inicial, "data_final": data_final},
         assistant_chat=assistant_chat,
         assistant_question=assistant_question,
+        assistant_provider_reason_text=get_assistant_provider_reason_text(get_texts(settings["idioma"]), assistant_chat.get("provider_reason")) if assistant_chat else "",
         assistant_api_url=url_for(
             "assistente_financeiro_api",
             data_inicial=data_inicial,
