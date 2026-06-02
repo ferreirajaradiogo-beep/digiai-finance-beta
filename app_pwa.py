@@ -340,8 +340,13 @@ TRANSLATIONS = {
         "assistant_answer_title": "Resposta",
         "assistant_provider_local": "Resposta local",
         "assistant_provider_openai": "Resposta com IA",
-        "assistant_provider_reason_missing_api_key": "A chave OPENAI_API_KEY ainda nao foi lida pelo backend publicado.",
+        "assistant_provider_reason_missing_api_key": "A chave ASSISTANT_API_KEY ainda nao foi lida pelo backend publicado.",
         "assistant_provider_reason_local_fallback": "A resposta caiu no modo local de seguranca.",
+        "assistant_provider_reason_provider_http_error": "O provedor de IA recusou a chamada ou ficou sem cota. Revise a chave e o limite do provedor.",
+        "assistant_provider_reason_provider_request_failed": "Nao consegui falar com o provedor de IA agora. Vou responder em modo local por seguranca.",
+        "assistant_provider_reason_provider_empty_output": "O provedor de IA respondeu sem texto util. Vou manter a resposta local por seguranca.",
+        "assistant_provider_reason_unsupported_provider": "O provedor configurado para o assistente nao e suportado por esta versao do backend.",
+        "assistant_provider_reason_local_provider_selected": "O assistente esta configurado para operar apenas em modo local.",
     },
     "en-US": {
         "app_title": "DiGiaI Caixa",
@@ -496,8 +501,13 @@ TRANSLATIONS = {
         "assistant_answer_title": "Answer",
         "assistant_provider_local": "Local answer",
         "assistant_provider_openai": "AI answer",
-        "assistant_provider_reason_missing_api_key": "The published backend has not picked up OPENAI_API_KEY yet.",
+        "assistant_provider_reason_missing_api_key": "The published backend has not picked up ASSISTANT_API_KEY yet.",
         "assistant_provider_reason_local_fallback": "The answer fell back to the local safe mode.",
+        "assistant_provider_reason_provider_http_error": "The AI provider rejected the request or ran out of quota. Check the provider key and limits.",
+        "assistant_provider_reason_provider_request_failed": "I could not reach the AI provider right now, so I answered in the local safe mode.",
+        "assistant_provider_reason_provider_empty_output": "The AI provider returned no useful text, so I kept the local safe answer.",
+        "assistant_provider_reason_unsupported_provider": "The configured assistant provider is not supported by this backend version.",
+        "assistant_provider_reason_local_provider_selected": "The assistant is configured to run only in local mode.",
     },
     "es-ES": {
         "app_title": "DiGiaI Caixa",
@@ -652,8 +662,13 @@ TRANSLATIONS = {
         "assistant_answer_title": "Respuesta",
         "assistant_provider_local": "Respuesta local",
         "assistant_provider_openai": "Respuesta con IA",
-        "assistant_provider_reason_missing_api_key": "El backend publicado aun no tomo la OPENAI_API_KEY.",
+        "assistant_provider_reason_missing_api_key": "El backend publicado aun no tomo la ASSISTANT_API_KEY.",
         "assistant_provider_reason_local_fallback": "La respuesta cayo al modo local de seguridad.",
+        "assistant_provider_reason_provider_http_error": "El proveedor de IA rechazo la llamada o se quedo sin cuota. Revisa la clave y el limite del proveedor.",
+        "assistant_provider_reason_provider_request_failed": "No pude hablar con el proveedor de IA ahora, asi que respondi en modo local de seguridad.",
+        "assistant_provider_reason_provider_empty_output": "El proveedor de IA respondio sin texto util, asi que mantuve la respuesta local de seguridad.",
+        "assistant_provider_reason_unsupported_provider": "El proveedor configurado para el asistente no es compatible con esta version del backend.",
+        "assistant_provider_reason_local_provider_selected": "El asistente esta configurado para funcionar solo en modo local.",
     },
 }
 
@@ -1661,6 +1676,11 @@ def get_assistant_provider_reason_text(texts, reason):
     mapping = {
         "missing_api_key": texts.get("assistant_provider_reason_missing_api_key", ""),
         "local_fallback": texts.get("assistant_provider_reason_local_fallback", ""),
+        "provider_http_error": texts.get("assistant_provider_reason_provider_http_error", ""),
+        "provider_request_failed": texts.get("assistant_provider_reason_provider_request_failed", ""),
+        "provider_empty_output": texts.get("assistant_provider_reason_provider_empty_output", ""),
+        "unsupported_provider": texts.get("assistant_provider_reason_unsupported_provider", ""),
+        "local_provider_selected": texts.get("assistant_provider_reason_local_provider_selected", ""),
     }
     return mapping.get(reason, "")
 
