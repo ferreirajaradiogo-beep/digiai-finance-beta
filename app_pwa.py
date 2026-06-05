@@ -319,7 +319,7 @@ TRANSLATIONS = {
         "total_registered": "Total de lançamentos",
         "assistant_nav": "Assistente",
         "assistant_title": "Assistente Financeiro",
-        "assistant_subtitle": "Uma leitura automática do seu mês, com alertas, economia e base pronta para IA futura.",
+        "assistant_subtitle": "Leitura automatica do periodo com suporte operacional para sync, plano, senha e gasto mensal.",
         "assistant_cta": "Abrir assistente",
         "assistant_refresh": "Atualizar análise",
         "assistant_generated": "Análise gerada com base nos lançamentos do período selecionado.",
@@ -334,9 +334,9 @@ TRANSLATIONS = {
         "assistant_overview": "Visão automática do período",
         "assistant_current_month": "Mês atual",
         "assistant_chat_title": "Pergunte ao assistente",
-        "assistant_chat_placeholder": "Ex.: como sincronizar meu app? qual categoria mais pesa? como mudar de plano?",
+        "assistant_chat_placeholder": "Ex.: como sincronizar meu app? se aparecer token invalido, o que faco? qual categoria mais pesa?",
         "assistant_chat_submit": "Perguntar",
-        "assistant_chat_hint": "Posso ajudar com sincronização, plano, senha e leitura do seu mês.",
+        "assistant_chat_hint": "Posso ajudar com sincronizacao, token invalido, plano, senha e leitura do seu mes.",
         "assistant_answer_title": "Resposta",
         "assistant_provider_local": "Resposta local",
         "assistant_provider_openai": "Resposta com IA",
@@ -1635,13 +1635,14 @@ def build_local_assistant_chat_reply(question, assistant_payload):
     normalized = str(question or "").strip().lower()
     suggestions = [
         "Como sincronizar meu app com o site?",
+        "Se aparecer token invalido, o que faco?",
         "Resumo do meu mes",
-        "Qual categoria mais pesa?",
+        "O que muda do Gratis para o Pro?",
     ]
 
     if any(term in normalized for term in ["sincron", "token", "api", "site", "app", "login"]):
         answer = (
-            "Use a mesma conta no app e no site, mantendo a URL da API em "
+            "Use a mesma conta no app e no site. No app, mantenha a URL da API em "
             "https://notafacil-api.onrender.com. Se aparecer token invalido, "
             "saia da conta e entre novamente para renovar a sessao."
         )

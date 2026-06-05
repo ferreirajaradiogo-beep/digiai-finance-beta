@@ -6,7 +6,7 @@
     <div class="profile-hero-copy">
         <span class="eyebrow light">Perfil</span>
         <h2>{{ session["user"] }}</h2>
-        <p>Conta {{ app_display_name }} conectada ao app, site e programa.</p>
+        <p>Conta {{ app_display_name }} conectada ao app, ao site e ao fluxo operacional.</p>
     </div>
     <div class="profile-hero-plan">
         <span>{{ texts.current_plan }}</span>
@@ -43,11 +43,11 @@
         </div>
 
         <div class="profile-link-stack">
-            <a href="{{ url_for('planos') }}" class="profile-shortcut">Ver detalhes da beta</a>
+            <a href="{{ url_for('planos') }}" class="profile-shortcut">Ver plano e limites</a>
             <a href="{{ url_for('assistente_financeiro') }}" class="profile-shortcut">Abrir assistente</a>
-            <a href="{{ url_for('index') }}#relatorios" class="profile-shortcut">Ver relatórios</a>
+            <a href="{{ url_for('index') }}#relatorios" class="profile-shortcut">Ver relatorios</a>
             <a href="{{ url_for('backup_download') }}" class="profile-shortcut">Backup na nuvem</a>
-            <a href="mailto:{{ support_email }}" class="profile-shortcut">Falar com suporte</a>
+            <a href="mailto:{{ support_email }}" class="profile-shortcut">Enviar duvida operacional</a>
         </div>
     </article>
 
@@ -146,7 +146,7 @@
 
             <div>
                 <span class="field-inline-label">Cor de destaque</span>
-                <p class="section-helper">Acentos como Ocean e Graphite agora ficam separados do fundo e liberados em qualquer plano.</p>
+                <p class="section-helper">Acentos como Ocean e Graphite ficam separados do fundo e ajudam a reduzir a saturacao visual da interface.</p>
             </div>
 
             <div class="theme-grid-bank">
