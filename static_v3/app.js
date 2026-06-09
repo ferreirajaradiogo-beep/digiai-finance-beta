@@ -31,7 +31,7 @@ window.addEventListener("appinstalled", () => {
 
 if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/service-worker.js?v=beta-3").then((registration) => {
+        navigator.serviceWorker.register("/service-worker.js?v=beta-5").then((registration) => {
             registration.update().catch(() => {});
         }).catch(() => {});
     });
@@ -42,3 +42,14 @@ if ("serviceWorker" in navigator) {
         window.location.reload();
     });
 }
+
+document.addEventListener("submit", (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    const button = form.querySelector('button[type="submit"]');
+    if (!button || button.dataset.submitting === "true") return;
+    button.dataset.submitting = "true";
+    button.dataset.originalText = button.textContent || "";
+    button.textContent = "Aguarde...";
+    button.disabled = true;
+});

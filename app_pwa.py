@@ -701,6 +701,10 @@ class BackendAuthError(RuntimeError):
     pass
 
 
+class BackendRateLimitError(RuntimeError):
+    pass
+
+
 def store_backend_snapshot(snapshot):
     if isinstance(snapshot, dict):
         session["backend_snapshot_cache"] = snapshot
@@ -760,6 +764,10 @@ def backend_api_request(path, method="GET", token="", body=None, query=None):
                 detail = raw
         if exc.code == 401 and token:
             raise BackendAuthError(detail or "Token invalido") from exc
+        if exc.code == 429:
+            raise BackendRateLimitError(
+                "Muitas tentativas em pouco tempo. Aguarde cerca de 1 minuto e tente entrar novamente."
+            ) from exc
         raise ValueError(detail or f"Erro HTTP {exc.code}") from exc
     except urllib_error.URLError as exc:
         raise ConnectionError("Nao foi possivel conectar ao backend.") from exc
@@ -1814,6 +1822,8 @@ def login():
                 return redirect(url_for("index"))
             except ValueError as exc:
                 error = str(exc) or TRANSLATIONS["pt-BR"]["wrong_password"]
+            except BackendRateLimitError as exc:
+                error = str(exc)
             except ConnectionError:
                 error = "Nao foi possivel conectar ao backend agora."
             return render_template("login_v3.html", error=error)
@@ -1874,6 +1884,8 @@ def cadastro():
                 return redirect(url_for("index"))
             except ValueError as exc:
                 error = str(exc) or TRANSLATIONS["pt-BR"]["user_exists"]
+            except BackendRateLimitError as exc:
+                error = str(exc)
             except ConnectionError:
                 error = "Nao foi possivel conectar ao backend agora."
             return render_template("cadastro_v3.html", error=error)
