@@ -512,6 +512,13 @@ button[type="submit"]:hover {
     font-weight: 800;
 }
 
+.topbar-chip.danger,
+.profile-shortcut.danger {
+    color: var(--danger);
+    border-color: rgba(255, 122, 122, 0.28);
+    background: rgba(255, 122, 122, 0.08);
+}
+
 .workspace-shell {
     min-width: 0;
 }

@@ -697,10 +697,19 @@ def backend_snapshot_from_session():
     return snapshot if isinstance(snapshot, dict) else {}
 
 
+class BackendAuthError(RuntimeError):
+    pass
+
+
 def store_backend_snapshot(snapshot):
     if isinstance(snapshot, dict):
         session["backend_snapshot_cache"] = snapshot
         session.modified = True
+
+
+def clear_backend_session(message="Sua sessao online expirou. Entre novamente para atualizar seus dados."):
+    session.clear()
+    flash(message, "warning")
 
 
 def mark_backend_unavailable(message="O backend esta acordando. Tente novamente em instantes."):
@@ -749,6 +758,8 @@ def backend_api_request(path, method="GET", token="", body=None, query=None):
                 detail = parsed.get("detail") if isinstance(parsed, dict) else raw
             except json.JSONDecodeError:
                 detail = raw
+        if exc.code == 401 and token:
+            raise BackendAuthError(detail or "Token invalido") from exc
         raise ValueError(detail or f"Erro HTTP {exc.code}") from exc
     except urllib_error.URLError as exc:
         raise ConnectionError("Nao foi possivel conectar ao backend.") from exc
@@ -764,6 +775,8 @@ def refresh_backend_me():
     except ConnectionError:
         mark_backend_unavailable()
         return backend_user_from_session()
+    except BackendAuthError:
+        raise
     except ValueError as exc:
         mark_backend_unavailable(str(exc) or "Nao foi possivel atualizar a sessao online agora.")
         return backend_user_from_session()
@@ -781,6 +794,8 @@ def get_backend_snapshot(force=False):
         except ConnectionError:
             mark_backend_unavailable()
             g.backend_snapshot = backend_snapshot_from_session()
+        except BackendAuthError:
+            raise
         except ValueError as exc:
             mark_backend_unavailable(str(exc) or "Nao foi possivel atualizar os dados online agora.")
             g.backend_snapshot = backend_snapshot_from_session()
@@ -982,6 +997,12 @@ def login_required(view):
         return view(*args, **kwargs)
 
     return wrapped_view
+
+
+@app.errorhandler(BackendAuthError)
+def handle_backend_auth_error(_error):
+    clear_backend_session()
+    return redirect(url_for("login"))
 
 
 def get_texts(language):
@@ -1887,6 +1908,21 @@ def cadastro():
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
+
+@app.route("/atualizar-dados")
+@login_required
+def atualizar_dados():
+    if backend_mode_enabled():
+        refresh_backend_me()
+        get_backend_snapshot(force=True)
+        flash("Dados atualizados com o backend oficial.", "success")
+    else:
+        flash("Conta local atualizada neste dispositivo.", "info")
+    next_url = request.args.get("next") or url_for("index")
+    if not str(next_url).startswith("/"):
+        next_url = url_for("index")
+    return redirect(next_url)
 
 
 @app.route("/")

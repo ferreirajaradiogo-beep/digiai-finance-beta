@@ -7,10 +7,10 @@
     <meta name="theme-color" content="#0f1a30">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="{{ url_for('manifest', v='beta-4') }}">
+    <link rel="manifest" href="{{ url_for('manifest', v='beta-5') }}">
     <link rel="icon" href="{{ url_for('static', filename='icons/favicon.png') }}" type="image/png">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-app.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style_v3.css', v='beta-4') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style_v3.css', v='beta-5') }}">
 </head>
 {% set current_endpoint = request.endpoint or '' %}
 {% set current_title = texts.dashboard %}
@@ -110,8 +110,10 @@
 
                 <div class="topbar-actions">
                     <a class="topbar-chip primary" href="{{ url_for('index') }}#novo-lancamento">+ {{ texts.new_transaction }}</a>
+                    <a class="topbar-chip" href="{{ url_for('atualizar_dados', next=request.full_path if request.query_string else request.path) }}">Atualizar dados</a>
                     <a class="topbar-chip" href="{{ url_for('backup_download') }}">{{ texts.download_backup }}</a>
                     <a class="topbar-avatar" href="{{ url_for('configuracoes') }}">{{ session["user"][0]|upper }}</a>
+                    <a class="topbar-chip danger" href="{{ url_for('logout') }}">{{ texts.logout }}</a>
                 </div>
             </header>
             {% endif %}
@@ -174,6 +176,6 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='app.js', v='beta-4') }}" defer></script>
+    <script src="{{ url_for('static', filename='app.js', v='beta-5') }}" defer></script>
 </body>
 </html>
