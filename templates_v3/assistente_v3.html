@@ -38,13 +38,37 @@
         <div class="panel-heading">
             <div>
                 <p class="eyebrow">{{ texts.assistant_answer_title }}</p>
-                <h3>{{ texts.assistant_provider_openai if assistant_chat.provider != 'local' else texts.assistant_provider_local }}</h3>
+                <h3>
+                    {% if assistant_chat.action_preview %}
+                    {{ texts.assistant_provider_action }}
+                    {% elif assistant_chat.provider != 'local' %}
+                    {{ texts.assistant_provider_openai }}
+                    {% else %}
+                    {{ texts.assistant_provider_local }}
+                    {% endif %}
+                </h3>
             </div>
         </div>
         {% if assistant_provider_reason_text %}
         <p class="assistant-provider-note">{{ assistant_provider_reason_text }}</p>
         {% endif %}
         <p>{{ assistant_chat.answer }}</p>
+        {% if assistant_chat.action_preview %}
+        <div class="assistant-action-preview">
+            <p class="eyebrow">{{ texts.assistant_action_preview }}</p>
+            <h3>{{ assistant_chat.action_preview.summary }}</h3>
+            {% if assistant_chat.action_preview.warnings %}
+            <p class="assistant-provider-note">{{ assistant_chat.action_preview.warnings|join(' ') }}</p>
+            {% endif %}
+            <form method="POST" action="{{ url_for('assistente_executar') }}">
+                <input type="hidden" name="action_type" value="{{ assistant_chat.action_preview.action_type }}">
+                <input type="hidden" name="payload" value='{{ assistant_chat.action_preview.payload|tojson }}'>
+                <button type="submit" class="bank-primary-button full">
+                    {{ assistant_chat.action_preview.confirmation_label or texts.assistant_confirm_action }}
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
     {% endif %}
 </section>

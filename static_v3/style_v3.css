@@ -1371,6 +1371,20 @@ select:focus {
     color: var(--accent);
 }
 
+.assistant-action-preview {
+    margin-top: 16px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    background: var(--card);
+    display: grid;
+    gap: 12px;
+}
+
+.assistant-action-preview h3 {
+    margin: 0;
+}
+
 .assistant-status-danger { background: rgba(255, 114, 98, 0.18); color: var(--danger); }
 .assistant-status-warning { background: rgba(255, 191, 85, 0.18); color: var(--warning); }
 .assistant-status-positive { background: rgba(30, 207, 134, 0.18); color: var(--success); }

@@ -1,9 +1,9 @@
-const CACHE_NAME = "notafacil-beta-pwa-v5";
+const CACHE_NAME = "notafacil-beta-pwa-v6";
 const APP_SHELL = [
   "/offline",
-  "/manifest.webmanifest?v=beta-5",
-  "/static_v3/style_v3.css?v=beta-5",
-  "/static_v3/app.js?v=beta-5",
+  "/manifest.webmanifest?v=beta-6",
+  "/static_v3/style_v3.css?v=beta-6",
+  "/static_v3/app.js?v=beta-6",
   "/static_v3/icons/icon-app.png",
   "/static_v3/icons/icon-maskable.png",
   "/static_v3/icons/favicon.png",

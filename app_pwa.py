@@ -340,6 +340,9 @@ TRANSLATIONS = {
         "assistant_answer_title": "Resposta",
         "assistant_provider_local": "Resposta local",
         "assistant_provider_openai": "Resposta com IA",
+        "assistant_provider_action": "Acao do assistente",
+        "assistant_action_preview": "Previa da acao",
+        "assistant_confirm_action": "Confirmar acao",
         "assistant_provider_reason_missing_api_key": "A chave ASSISTANT_API_KEY ainda nao foi lida pelo backend publicado.",
         "assistant_provider_reason_local_fallback": "A resposta caiu no modo local de seguranca.",
         "assistant_provider_reason_provider_http_error": "O provedor de IA recusou a chamada ou ficou sem cota. Revise a chave e o limite do provedor.",
@@ -501,6 +504,9 @@ TRANSLATIONS = {
         "assistant_answer_title": "Answer",
         "assistant_provider_local": "Local answer",
         "assistant_provider_openai": "AI answer",
+        "assistant_provider_action": "Assistant action",
+        "assistant_action_preview": "Action preview",
+        "assistant_confirm_action": "Confirm action",
         "assistant_provider_reason_missing_api_key": "The published backend has not picked up ASSISTANT_API_KEY yet.",
         "assistant_provider_reason_local_fallback": "The answer fell back to the local safe mode.",
         "assistant_provider_reason_provider_http_error": "The AI provider rejected the request or ran out of quota. Check the provider key and limits.",
@@ -662,6 +668,9 @@ TRANSLATIONS = {
         "assistant_answer_title": "Respuesta",
         "assistant_provider_local": "Respuesta local",
         "assistant_provider_openai": "Respuesta con IA",
+        "assistant_provider_action": "Accion del asistente",
+        "assistant_action_preview": "Vista previa de la accion",
+        "assistant_confirm_action": "Confirmar accion",
         "assistant_provider_reason_missing_api_key": "El backend publicado aun no tomo la ASSISTANT_API_KEY.",
         "assistant_provider_reason_local_fallback": "La respuesta cayo al modo local de seguridad.",
         "assistant_provider_reason_provider_http_error": "El proveedor de IA rechazo la llamada o se quedo sin cuota. Revisa la clave y el limite del proveedor.",
@@ -2057,6 +2066,43 @@ def assistente_financeiro_api():
         "summary": assistant["summary"],
         "future_bridge": assistant["future_bridge"],
     }
+
+
+@app.route("/assistente/executar", methods=["POST"])
+@login_required
+def assistente_executar():
+    if not backend_mode_enabled():
+        flash("Conecte a conta online para executar acoes do assistente.", "error")
+        return redirect(url_for("assistente_financeiro"))
+
+    action_type = request.form.get("action_type", "").strip()
+    payload_raw = request.form.get("payload", "{}")
+    try:
+        payload = json.loads(payload_raw)
+    except json.JSONDecodeError:
+        payload = {}
+
+    if not action_type or not isinstance(payload, dict):
+        flash("Nao consegui validar a acao do assistente.", "error")
+        return redirect(url_for("assistente_financeiro"))
+
+    try:
+        response = backend_api_request(
+            "/assistant/execute",
+            method="POST",
+            token=get_backend_token(),
+            body={"action_type": action_type, "payload": payload},
+        )
+        get_backend_snapshot(force=True)
+        flash(response.get("summary") or "Acao executada com sucesso.", "success")
+    except BackendRateLimitError as exc:
+        flash(str(exc), "warning")
+    except ValueError as exc:
+        flash(str(exc) or "Nao foi possivel executar a acao.", "error")
+    except ConnectionError:
+        flash("Nao foi possivel conectar ao backend agora.", "error")
+
+    return redirect(url_for("assistente_financeiro"))
 
 
 @app.route("/add", methods=["POST"])
