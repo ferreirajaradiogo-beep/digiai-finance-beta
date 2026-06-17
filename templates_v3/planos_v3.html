@@ -3,54 +3,33 @@
 {% block content %}
 <section class="page-hero-inline">
     <div>
-        <span class="eyebrow">Planos</span>
-        <h2>Free e Pro com identidade padronizada</h2>
-        <p>Os planos agora seguem a mesma base do backend oficial. Fundo e cor de destaque ficam separados para manter a experiencia coerente entre site, app e programa.</p>
+        <span class="eyebrow">Acesso gratuito</span>
+        <h2>Todos os recursos liberados</h2>
+        <p>Esta publicacao nao separa mais Free e Pro. O {{ app_display_name }} fica gratuito, com contas, categorias, temas, relatorios, alertas e assistente operacional liberados.</p>
     </div>
 </section>
 
 <section class="pricing-grid-bank">
-    <article class="pricing-card-bank {% if plan_key == 'free' %}featured active{% endif %}">
+    <article class="pricing-card-bank featured active">
         <div class="pricing-card-head">
             <div>
-                <span class="eyebrow light">Plano atual</span>
-                <h3>{{ app_display_name }} Free</h3>
+                <span class="eyebrow light">Atual</span>
+                <h3>{{ app_display_name }} Gratuito</h3>
             </div>
             <span class="pricing-value">R$ 0</span>
         </div>
-        <p>Base enxuta para usar o sistema com 1 conta e liberdade visual para combinar fundo preto ou branco com qualquer cor de destaque.</p>
+        <p>Use o sistema completo sem bloqueio pago nesta etapa de publicacao.</p>
         <ul>
-            <li>20 lancamentos por mes</li>
-            <li>1 conta</li>
-            <li>10 categorias</li>
+            <li>Lancamentos liberados</li>
+            <li>Multi-contas</li>
+            <li>Categorias liberadas</li>
             <li>Fundo Preto ou Branco</li>
-            <li>Cores de destaque livres</li>
-            <li>Backup e exportacao basica</li>
+            <li>Todas as cores de destaque</li>
+            <li>Alertas, relatorios, backup e exportacao</li>
+            <li>Assistente operacional com confirmacao</li>
         </ul>
         <form method="POST" action="{{ url_for('alterar_plano', plan_key='free') }}">
-            <button type="submit" class="bank-primary-button full">{% if plan_key == 'free' %}Selecionado{% else %}Ativar Free{% endif %}</button>
-        </form>
-    </article>
-
-    <article class="pricing-card-bank {% if plan_key == 'pro' %}featured active{% endif %}">
-        <div class="pricing-card-head">
-            <div>
-                <span class="eyebrow light">Plano completo</span>
-                <h3>{{ app_display_name }} Pro</h3>
-            </div>
-            <span class="pricing-value">R$ 20/mes</span>
-        </div>
-        <p>Plano liberado para multi-contas, multimoeda, alertas e relatorios avancados, mantendo a mesma liberdade visual.</p>
-        <ul>
-            <li>Lancamentos ilimitados</li>
-            <li>Multi-contas</li>
-            <li>Todas as cores visuais continuam liberadas</li>
-            <li>Moeda variavel</li>
-            <li>Alertas e relatorios avancados</li>
-            <li>Mais liberdade visual com o mesmo fundo</li>
-        </ul>
-        <form method="POST" action="{{ url_for('alterar_plano', plan_key='pro') }}">
-            <button type="submit" class="bank-primary-button full">{% if plan_key == 'pro' %}Selecionado{% else %}Ativar Pro{% endif %}</button>
+            <button type="submit" class="bank-primary-button full">Acesso liberado</button>
         </form>
     </article>
 </section>

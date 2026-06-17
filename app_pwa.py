@@ -78,17 +78,17 @@ PAID_COLOR_PRESETS = [
 PLANS = {
     "free": {
         "name": "Gratuito",
-        "transaction_limit_per_month": 20,
-        "account_limit": 1,
-        "category_limit": 10,
-        "allow_multi_currency": False,
-        "allow_currency_conversion": False,
-        "allow_advanced_reports": False,
-        "allow_alerts": False,
-        "allow_unlimited_colors": False,
+        "transaction_limit_per_month": None,
+        "account_limit": None,
+        "category_limit": None,
+        "allow_multi_currency": True,
+        "allow_currency_conversion": True,
+        "allow_advanced_reports": True,
+        "allow_alerts": True,
+        "allow_unlimited_colors": True,
     },
     "pro": {
-        "name": "Pago",
+        "name": "Gratuito",
         "transaction_limit_per_month": None,
         "account_limit": None,
         "category_limit": None,
@@ -113,22 +113,21 @@ BACKGROUND_THEME_OPTIONS = [
 ]
 FREE_ACCENT_THEME_OPTIONS = [
     ("ocean", "Ocean"),
-]
-PAID_ACCENT_THEME_OPTIONS = FREE_ACCENT_THEME_OPTIONS + [
     ("graphite", "Graphite"),
     ("ember", "Ember"),
     ("royal", "Royal"),
     ("sand", "Sand"),
     ("mint", "Mint"),
 ]
+PAID_ACCENT_THEME_OPTIONS = FREE_ACCENT_THEME_OPTIONS
 
 ACCENT_THEME_META = {
     "ocean": {"label": "Ocean", "premium": False},
-    "graphite": {"label": "Graphite", "premium": True},
-    "ember": {"label": "Ember", "premium": True},
-    "royal": {"label": "Royal", "premium": True},
-    "sand": {"label": "Sand", "premium": True},
-    "mint": {"label": "Mint", "premium": True},
+    "graphite": {"label": "Graphite", "premium": False},
+    "ember": {"label": "Ember", "premium": False},
+    "royal": {"label": "Royal", "premium": False},
+    "sand": {"label": "Sand", "premium": False},
+    "mint": {"label": "Mint", "premium": False},
 }
 
 
@@ -235,32 +234,32 @@ TRANSLATIONS = {
         "account_exists": "Essa conta já existe para este usuário.",
         "field_required": "Preencha o nome antes de salvar.",
         "free_plan": "Gratuito",
-        "paid_plan": "Pago",
+        "paid_plan": "Gratuito",
         "current_plan": "Plano atual",
-        "upgrade_plan": "Ativar plano pago",
-        "free_plan_badge": "Até 20 lançamentos por mês",
-        "paid_plan_badge": "Recursos avançados e ilimitados",
-        "limit_transactions_reached": "Você atingiu o limite de 20 lançamentos neste mês no plano gratuito.",
-        "limit_categories_reached": "Você atingiu o limite de 10 categorias no plano gratuito.",
-        "limit_accounts_reached": "O plano gratuito permite apenas 1 conta.",
-        "free_account_hint": "No plano gratuito, você pode usar 1 conta.",
-        "limited_color_message": "No plano gratuito, escolha uma cor da paleta liberada.",
-        "premium_feature_message": "Esse recurso faz parte do plano pago.",
-        "premium_themes_help": "Temas extras do sistema ficam disponíveis no plano pago.",
+        "upgrade_plan": "Recursos gratuitos",
+        "free_plan_badge": "Todos os recursos liberados",
+        "paid_plan_badge": "Todos os recursos liberados",
+        "limit_transactions_reached": "Os lançamentos estão liberados nesta publicação.",
+        "limit_categories_reached": "As categorias estão liberadas nesta publicação.",
+        "limit_accounts_reached": "As contas estão liberadas nesta publicação.",
+        "free_account_hint": "Você pode criar quantas contas precisar.",
+        "limited_color_message": "Todas as cores estão liberadas nesta publicação.",
+        "premium_feature_message": "Recurso gratuito nesta publicação.",
+        "premium_themes_help": "Temas e cores extras estão liberados para todos.",
         "export_excel": "Exportar Excel",
         "export_pdf": "Exportar PDF",
         "download_backup": "Baixar backup",
         "backup_ready": "Backup gerado com sucesso.",
         "reports_title": "Relatórios",
-        "reports_subtitle": "Os relatórios avançados ficam disponíveis no plano pago.",
-        "advanced_reports_locked": "Gráficos por mês, gastos por categoria e comparação mensal são recursos premium.",
-        "alerts_locked": "Alertas e notificações de gasto excessivo são recursos premium.",
+        "reports_subtitle": "Relatórios avançados liberados para todos.",
+        "advanced_reports_locked": "Ainda não há dados suficientes para montar os gráficos avançados.",
+        "alerts_locked": "Alertas e notificações estão liberados nesta publicação.",
         "alerts_title": "Alertas",
         "alert_threshold": "Limite mensal de alerta",
         "alert_threshold_help": "Receba um aviso quando suas despesas do período ultrapassarem esse valor.",
         "overspending_alert": "Alerta: suas despesas passaram do limite configurado.",
-        "paid_colors_title": "Cores premium",
-        "paid_colors_help": "O plano pago libera uma paleta maior para personalizar categorias.",
+        "paid_colors_title": "Cores liberadas",
+        "paid_colors_help": "Todas as cores estão liberadas para personalizar categorias.",
         "monthly_chart": "Gráfico mensal",
         "category_chart": "Gastos por categoria",
         "monthly_comparison": "Comparação mensal",
@@ -319,7 +318,7 @@ TRANSLATIONS = {
         "total_registered": "Total de lançamentos",
         "assistant_nav": "Assistente",
         "assistant_title": "Assistente Financeiro",
-        "assistant_subtitle": "Leitura automatica do periodo com suporte operacional para sync, plano, senha e gasto mensal.",
+        "assistant_subtitle": "Leitura automatica do periodo com suporte operacional para sync, senha e gasto mensal.",
         "assistant_cta": "Abrir assistente",
         "assistant_refresh": "Atualizar análise",
         "assistant_generated": "Análise gerada com base nos lançamentos do período selecionado.",
@@ -336,7 +335,7 @@ TRANSLATIONS = {
         "assistant_chat_title": "Pergunte ao assistente",
         "assistant_chat_placeholder": "Ex.: como sincronizar meu app? se aparecer token invalido, o que faco? qual categoria mais pesa?",
         "assistant_chat_submit": "Perguntar",
-        "assistant_chat_hint": "Posso ajudar com sincronizacao, token invalido, plano, senha e leitura do seu mes.",
+        "assistant_chat_hint": "Posso ajudar com sincronizacao, token invalido, senha, lancamentos e leitura do seu mes.",
         "assistant_answer_title": "Resposta",
         "assistant_provider_local": "Resposta local",
         "assistant_provider_openai": "Resposta com IA",
@@ -399,32 +398,32 @@ TRANSLATIONS = {
         "account_exists": "This account already exists for this user.",
         "field_required": "Fill in the name before saving.",
         "free_plan": "Free",
-        "paid_plan": "Paid",
+        "paid_plan": "Free",
         "current_plan": "Current plan",
-        "upgrade_plan": "Activate paid plan",
-        "free_plan_badge": "Up to 20 entries per month",
-        "paid_plan_badge": "Advanced and unlimited features",
-        "limit_transactions_reached": "You reached the 20 entries monthly limit on the free plan.",
-        "limit_categories_reached": "You reached the 10 categories limit on the free plan.",
-        "limit_accounts_reached": "The free plan allows only 1 account.",
-        "free_account_hint": "On the free plan, you can use 1 account.",
-        "limited_color_message": "On the free plan, choose a color from the allowed palette.",
-        "premium_feature_message": "This feature is part of the paid plan.",
-        "premium_themes_help": "Extra app themes are available on the paid plan.",
+        "upgrade_plan": "Free features",
+        "free_plan_badge": "All features unlocked",
+        "paid_plan_badge": "All features unlocked",
+        "limit_transactions_reached": "Entries are unlocked in this release.",
+        "limit_categories_reached": "Categories are unlocked in this release.",
+        "limit_accounts_reached": "Accounts are unlocked in this release.",
+        "free_account_hint": "You can create as many accounts as you need.",
+        "limited_color_message": "All colors are unlocked in this release.",
+        "premium_feature_message": "This feature is free in this release.",
+        "premium_themes_help": "Extra app themes are unlocked for everyone.",
         "export_excel": "Export Excel",
         "export_pdf": "Export PDF",
         "download_backup": "Download backup",
         "backup_ready": "Backup generated successfully.",
         "reports_title": "Reports",
-        "reports_subtitle": "Advanced reports are available on the paid plan.",
-        "advanced_reports_locked": "Monthly charts, category spending and monthly comparison are premium features.",
-        "alerts_locked": "Alerts and overspending notifications are premium features.",
+        "reports_subtitle": "Advanced reports are unlocked for everyone.",
+        "advanced_reports_locked": "There is not enough data yet to build advanced charts.",
+        "alerts_locked": "Alerts and overspending notifications are unlocked in this release.",
         "alerts_title": "Alerts",
         "alert_threshold": "Monthly alert threshold",
         "alert_threshold_help": "Get a warning when your period expenses exceed this amount.",
         "overspending_alert": "Alert: your expenses exceeded the configured threshold.",
-        "paid_colors_title": "Premium colors",
-        "paid_colors_help": "The paid plan unlocks a wider palette to customize categories.",
+        "paid_colors_title": "Unlocked colors",
+        "paid_colors_help": "All colors are unlocked to customize categories.",
         "monthly_chart": "Monthly chart",
         "category_chart": "Spending by category",
         "monthly_comparison": "Monthly comparison",
@@ -563,32 +562,32 @@ TRANSLATIONS = {
         "account_exists": "Esa cuenta ya existe para este usuario.",
         "field_required": "Completa el nombre antes de guardar.",
         "free_plan": "Gratis",
-        "paid_plan": "Pago",
+        "paid_plan": "Gratis",
         "current_plan": "Plan actual",
-        "upgrade_plan": "Activar plan pago",
-        "free_plan_badge": "Hasta 20 registros por mes",
-        "paid_plan_badge": "Funciones avanzadas e ilimitadas",
-        "limit_transactions_reached": "Alcanzaste el límite de 20 registros este mes en el plan gratis.",
-        "limit_categories_reached": "Alcanzaste el límite de 10 categorías en el plan gratis.",
-        "limit_accounts_reached": "El plan gratis permite solo 1 cuenta.",
-        "free_account_hint": "En el plan gratis, puedes usar 1 cuenta.",
-        "limited_color_message": "En el plan gratis, elige un color de la paleta permitida.",
-        "premium_feature_message": "Esta función forma parte del plan pago.",
-        "premium_themes_help": "Los temas extra del sistema están disponibles en el plan pago.",
+        "upgrade_plan": "Recursos gratis",
+        "free_plan_badge": "Todos los recursos liberados",
+        "paid_plan_badge": "Todos los recursos liberados",
+        "limit_transactions_reached": "Los registros estan liberados en esta publicacion.",
+        "limit_categories_reached": "Las categorias estan liberadas en esta publicacion.",
+        "limit_accounts_reached": "Las cuentas estan liberadas en esta publicacion.",
+        "free_account_hint": "Puedes crear tantas cuentas como necesites.",
+        "limited_color_message": "Todos los colores estan liberados en esta publicacion.",
+        "premium_feature_message": "Recurso gratuito en esta publicacion.",
+        "premium_themes_help": "Los temas extra estan liberados para todos.",
         "export_excel": "Exportar Excel",
         "export_pdf": "Exportar PDF",
         "download_backup": "Descargar backup",
         "backup_ready": "Backup generado con éxito.",
         "reports_title": "Reportes",
-        "reports_subtitle": "Los reportes avanzados están disponibles en el plan pago.",
-        "advanced_reports_locked": "Gráficos por mes, gastos por categoría y comparación mensual son funciones premium.",
-        "alerts_locked": "Alertas y notificaciones de gasto excesivo son funciones premium.",
+        "reports_subtitle": "Reportes avanzados liberados para todos.",
+        "advanced_reports_locked": "Todavia no hay datos suficientes para montar graficos avanzados.",
+        "alerts_locked": "Alertas y notificaciones estan liberadas en esta publicacion.",
         "alerts_title": "Alertas",
         "alert_threshold": "Límite mensual de alerta",
         "alert_threshold_help": "Recibe un aviso cuando tus gastos del período superen ese valor.",
         "overspending_alert": "Alerta: tus gastos superaron el límite configurado.",
-        "paid_colors_title": "Colores premium",
-        "paid_colors_help": "El plan pago libera una paleta más amplia para personalizar categorías.",
+        "paid_colors_title": "Colores liberados",
+        "paid_colors_help": "Todos los colores estan liberados para personalizar categorias.",
         "monthly_chart": "Gráfico mensual",
         "category_chart": "Gastos por categoría",
         "monthly_comparison": "Comparación mensual",
@@ -1177,20 +1176,11 @@ def save_settings(usuario, idioma, moeda, tema, plano=None, alerta_limite=None):
 
 
 def get_plan_key(usuario):
-    if backend_mode_enabled():
-        return get_settings(usuario).get("plano", "free")
-    if PUBLIC_BETA_MODE:
-        return "free"
-    settings = get_settings(usuario)
-    return settings.get("plano", "free")
+    return "free"
 
 
 def get_plan_config(plan_key):
-    if backend_mode_enabled():
-        return PLANS.get(plan_key, PLANS["free"])
-    if PUBLIC_BETA_MODE:
-        return PLANS["free"]
-    return PLANS.get(plan_key, PLANS["free"])
+    return PLANS["free"]
 
 
 def get_theme_options_for_plan(plan_key):
@@ -1207,11 +1197,7 @@ def get_accent_theme_options_for_plan(plan_key):
 
 
 def is_paid_user(usuario):
-    if backend_mode_enabled():
-        return get_plan_key(usuario) == "pro"
-    if PUBLIC_BETA_MODE:
-        return False
-    return get_plan_key(usuario) == "pro"
+    return True
 
 
 def count_transactions_this_month(usuario):
@@ -1301,6 +1287,7 @@ def get_available_years(usuario):
 
 
 def enforce_free_plan_limit(usuario, resource, language, extra=None):
+    return None
     texts = get_texts(language)
     plan = get_plan_config(get_plan_key(usuario))
 
@@ -1675,7 +1662,7 @@ def build_local_assistant_chat_reply(question, assistant_payload):
         "Como sincronizar meu app com o site?",
         "Se aparecer token invalido, o que faco?",
         "Resumo do meu mes",
-        "O que muda do Gratis para o Pro?",
+        "Como criar parcelas pelo assistente?",
     ]
 
     if any(term in normalized for term in ["sincron", "token", "api", "site", "app", "login"]):
@@ -1687,8 +1674,8 @@ def build_local_assistant_chat_reply(question, assistant_payload):
         mode = "account"
     elif any(term in normalized for term in ["plano", "pro", "free", "gratis", "senha"]):
         answer = (
-            "O plano da conta vem do backend. Se voce quiser mudar entre Free e Pro, "
-            "faça isso com a conta online conectada. Para senha, use Configuracoes > Acesso da conta."
+            "Nesta publicacao nao existe mais separacao entre Gratis e Pro: os recursos estao gratuitos. "
+            "Para senha, use Configuracoes > Acesso da conta."
         )
         mode = "help"
     else:
@@ -2415,35 +2402,9 @@ def alterar_plano(plan_key):
         return redirect(url_for("planos"))
 
     user = session["user"]
-    if backend_mode_enabled():
-        try:
-            payload = backend_api_request(
-                "/me/plan",
-                method="PATCH",
-                token=get_backend_token(),
-                body={"plan": plan_key},
-            )
-            update_backend_session_user(payload)
-            get_backend_snapshot(force=True)
-            flash(f"{get_texts(get_settings(user)['idioma'])['current_plan']}: {PLANS[plan_key]['name']}", "success")
-        except ValueError as exc:
-            flash(str(exc) or "Erro ao alterar o plano.", "error")
-        except ConnectionError:
-            flash("Nao foi possivel conectar ao backend agora.", "error")
-        return redirect(url_for("planos"))
-
-    if PUBLIC_BETA_MODE:
-        flash(f"A beta publica do {APP_DISPLAY_NAME} funciona apenas no plano gratuito nesta fase.", "info")
-        return redirect(url_for("planos"))
-
     settings = get_settings(user)
-    moeda = settings["moeda"] if PLANS[plan_key]["allow_multi_currency"] else "BRL"
-    alerta_limite = settings.get("alerta_limite", 0) if PLANS[plan_key]["allow_alerts"] else 0
-    allowed_themes = {item[0] for item in get_theme_options_for_plan(plan_key)}
-    tema = settings["tema"] if settings["tema"] in allowed_themes else normalize_theme_key(DEFAULT_SETTINGS["tema"], plan_key)
-    save_settings(user, settings["idioma"], moeda, tema, plan_key, alerta_limite)
-    write_local_backup(user)
-    flash(f"{get_texts(settings['idioma'])['current_plan']}: {PLANS[plan_key]['name']}", "success")
+    save_settings(user, settings["idioma"], settings["moeda"], settings["tema"], "free", settings.get("alerta_limite", 0))
+    flash("Todos os recursos estao gratuitos e liberados nesta publicacao.", "success")
     return redirect(url_for("planos"))
 
 

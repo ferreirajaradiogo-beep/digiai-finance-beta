@@ -1,7 +1,7 @@
 {% extends "base_v3.html" %}
 
 {% block content %}
-{% set palette = paid_color_presets if plan_key == 'pro' else free_allowed_colors %}
+{% set palette = paid_color_presets %}
 
 <section class="page-hero-inline">
     <div>
@@ -37,9 +37,7 @@
             <button type="submit" class="bank-primary-button full">+ {{ texts.new_account }}</button>
         </form>
 
-        {% if plan_key == 'free' %}
         <p class="section-helper">{{ texts.free_account_hint }}</p>
-        {% endif %}
 
         <div class="stacked-list-modern">
             {% for conta in contas %}
@@ -101,11 +99,7 @@
         </form>
 
         <p class="section-helper">
-            {% if plan_key == 'free' %}
-            {{ texts.limited_color_message }}
-            {% else %}
             {{ texts.paid_colors_help }}
-            {% endif %}
         </p>
 
         <div class="stacked-list-modern">

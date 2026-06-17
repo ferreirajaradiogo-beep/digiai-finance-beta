@@ -106,7 +106,7 @@
                 </div>
             </div>
 
-            {% if plan_key == 'pro' and advanced_reports.has_data %}
+            {% if advanced_reports.has_data %}
             <div class="reports-bento">
                 {% if advanced_reports.category_series %}
                 {% set donut = namespace(offset=0) %}
@@ -170,8 +170,7 @@
             {% else %}
             <div class="locked-state-card">
                 <strong>{{ texts.reports_subtitle }}</strong>
-                <p>{{ texts.advanced_reports_locked if plan_key != 'pro' else texts.no_report_data }}</p>
-                <a class="bank-primary-button small" href="{{ url_for('planos') }}">{{ texts.plans }}</a>
+                <p>{{ texts.no_report_data }}</p>
             </div>
             {% endif %}
         </article>

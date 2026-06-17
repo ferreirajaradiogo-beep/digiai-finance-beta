@@ -74,9 +74,9 @@
             </nav>
 
             <div class="rail-plan-card">
-                <span class="eyebrow">{{ texts.current_plan }}</span>
-                <strong>{{ texts.free_plan if plan_key == 'free' else texts.paid_plan }}</strong>
-                <p>{% if plan_key == 'free' %}{{ texts.free_plan_badge }}{% else %}{{ texts.paid_plan_badge }}{% endif %}</p>
+                <span class="eyebrow">Acesso gratuito</span>
+                <strong>Recursos liberados</strong>
+                <p>Sem divisao Free/Pro nesta publicacao.</p>
                 <a href="{{ url_for('planos') }}" class="ghost-link">{{ texts.plans }}</a>
             </div>
 

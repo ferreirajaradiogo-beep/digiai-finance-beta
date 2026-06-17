@@ -27,7 +27,7 @@
         <div class="assistant-chat-actions">
             <button type="submit" class="bank-primary-button">{{ texts.assistant_chat_submit }}</button>
             <div class="assistant-suggestion-row">
-                {% for suggestion in (assistant_chat.suggestions if assistant_chat and assistant_chat.suggestions else ['Como sincronizar meu app com o site?', 'Se aparecer token invalido, o que faco?', 'Resumo do meu mes', 'O que muda do Gratis para o Pro?']) %}
+                {% for suggestion in (assistant_chat.suggestions if assistant_chat and assistant_chat.suggestions else ['Como sincronizar meu app com o site?', 'Se aparecer token invalido, o que faco?', 'Resumo do meu mes', 'Como criar parcelas pelo assistente?']) %}
                 <button type="submit" name="question" value="{{ suggestion }}" class="assistant-badge suggestion">{{ suggestion }}</button>
                 {% endfor %}
             </div>
