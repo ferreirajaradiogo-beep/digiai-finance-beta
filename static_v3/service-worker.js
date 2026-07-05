@@ -1,4 +1,4 @@
-const CACHE_NAME = "notafacil-beta-pwa-v6";
+const CACHE_NAME = "notafacil-beta-pwa-v7";
 const APP_SHELL = [
   "/offline",
   "/manifest.webmanifest?v=beta-6",

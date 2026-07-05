@@ -1,12 +1,12 @@
-# NotaFacil Beta Web
+# Dig.ai Finanças Beta Web
 
 Esta pasta e uma versao separada do site para publicar uma beta publica sem mexer na versao principal.
 
 Identidade atual desta beta:
 
-- produto: `DigiAI Finance`
+- produto: `Dig.ai Finanças`
 - subtitulo: `Controle financeiro pessoal inteligente`
-- empresa: `DigiAI`
+- empresa: `Zattara Soluções Inteligentes`
 - suporte: `digiai.oficial@gmail.com`
 
 ## Objetivo da beta

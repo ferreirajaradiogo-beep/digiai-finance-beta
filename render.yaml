@@ -15,11 +15,11 @@ services:
       - key: NOTAFACIL_URL_SCHEME
         value: "https"
       - key: NOTAFACIL_APP_NAME
-        value: DiGiaI Caixa
+        value: Dig.ai Finanças
       - key: NOTAFACIL_APP_TAGLINE
         value: Controle financeiro pessoal inteligente
       - key: NOTAFACIL_COMPANY_NAME
-        value: DigiAI
+        value: Zattara Soluções Inteligentes
       - key: NOTAFACIL_SUPPORT_EMAIL
         value: digiai.oficial@gmail.com
       - key: NOTAFACIL_BACKEND_URL

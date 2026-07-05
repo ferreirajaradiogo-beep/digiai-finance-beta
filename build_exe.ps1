@@ -6,7 +6,7 @@ Set-Location $ProjectDir
 python -m pip install --upgrade pyinstaller
 
 pyinstaller `
-  --name "NotaFacil" `
+  --name "DigAiFinancas" `
   --onefile `
   --noconsole `
   --icon "static_v3\icons\app.ico" `
@@ -15,4 +15,4 @@ pyinstaller `
   "app_pwa.py"
 
 Write-Host ""
-Write-Host "EXE gerado em: $ProjectDir\dist\NotaFacil.exe"
+Write-Host "EXE gerado em: $ProjectDir\dist\DigAiFinancas.exe"

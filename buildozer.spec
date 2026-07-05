@@ -1,6 +1,6 @@
 [app]
-title = NotaFácil
-package.name = notafacil
+title = Dig.ai Finanças
+package.name = digai_financas
 package.domain = org.diogo.financeiro
 source.dir = .
 source.include_exts = py,db,png,jpg,kv,atlas,json

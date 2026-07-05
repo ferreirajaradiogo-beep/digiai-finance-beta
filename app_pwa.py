@@ -46,9 +46,9 @@ app.config.update(
 )
 
 BASE_DIR = Path(__file__).resolve().parent
-APP_DISPLAY_NAME = os.environ.get("NOTAFACIL_APP_NAME", "DiGiaI Caixa")
+APP_DISPLAY_NAME = os.environ.get("NOTAFACIL_APP_NAME", "Dig.ai Finanças")
 APP_TAGLINE = os.environ.get("NOTAFACIL_APP_TAGLINE", "Controle financeiro pessoal inteligente")
-COMPANY_NAME = os.environ.get("NOTAFACIL_COMPANY_NAME", "DigiAI")
+COMPANY_NAME = os.environ.get("NOTAFACIL_COMPANY_NAME", "Zattara Soluções Inteligentes")
 SUPPORT_EMAIL = os.environ.get("NOTAFACIL_SUPPORT_EMAIL", "digiai.oficial@gmail.com")
 PUBLIC_BETA_MODE = True
 DB_PATH = Path(os.environ.get("NOTAFACIL_DB_PATH", str(BASE_DIR / "financeiro_beta.db"))).expanduser()
@@ -187,7 +187,7 @@ def get_accent_theme_class(theme_key):
 
 TRANSLATIONS = {
     "pt-BR": {
-        "app_title": "DiGiaI Caixa",
+        "app_title": "Dig.ai Finanças",
         "dashboard": "Dashboard",
         "settings": "Configurações",
         "management": "Categorias e contas",
@@ -351,7 +351,7 @@ TRANSLATIONS = {
         "assistant_provider_reason_local_provider_selected": "O assistente esta configurado para operar apenas em modo local.",
     },
     "en-US": {
-        "app_title": "DiGiaI Caixa",
+        "app_title": "Dig.ai Finanças",
         "dashboard": "Dashboard",
         "settings": "Settings",
         "management": "Categories and accounts",
@@ -515,7 +515,7 @@ TRANSLATIONS = {
         "assistant_provider_reason_local_provider_selected": "The assistant is configured to run only in local mode.",
     },
     "es-ES": {
-        "app_title": "DiGiaI Caixa",
+        "app_title": "Dig.ai Finanças",
         "dashboard": "Panel",
         "settings": "Configuración",
         "management": "Categorías y cuentas",
@@ -2042,7 +2042,7 @@ def assistente_financeiro_api():
     )
     assistant = build_assistant_payload(user, settings, data_inicial, data_final)
     return {
-        "app": "DiGiaI Caixa",
+        "app": "Dig.ai Finanças",
         "feature": "Assistente Financeiro",
         "provider": assistant["provider"],
         "period": assistant["snapshot"]["period"],

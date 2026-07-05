@@ -8,9 +8,9 @@ Esta beta agora esta preparada para um caminho gratuito mais realista:
 
 ## Identidade atual
 
-- produto: `DigiAI Finance`
+- produto: `Dig.ai Finanças`
 - subtitulo: `Controle financeiro pessoal inteligente`
-- empresa: `DigiAI`
+- empresa: `Zattara Soluções Inteligentes`
 - suporte: `digiai.oficial@gmail.com`
 
 ## O que mudou tecnicamente
@@ -81,9 +81,9 @@ Ja definidas no blueprint:
 - `FLASK_DEBUG=false`
 - `NOTAFACIL_COOKIE_SECURE=true`
 - `NOTAFACIL_URL_SCHEME=https`
-- `NOTAFACIL_APP_NAME=DigiAI Finance`
+- `NOTAFACIL_APP_NAME=Dig.ai Finanças`
 - `NOTAFACIL_APP_TAGLINE=Controle financeiro pessoal inteligente`
-- `NOTAFACIL_COMPANY_NAME=DigiAI`
+- `NOTAFACIL_COMPANY_NAME=Zattara Soluções Inteligentes`
 - `NOTAFACIL_SUPPORT_EMAIL=digiai.oficial@gmail.com`
 - `DATABASE_URL` vindo do banco Postgres criado no Render
 
