@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from csv import writer as csv_writer
 from collections import Counter
 from datetime import date, timedelta
@@ -738,7 +739,7 @@ def update_backend_session_user(payload):
     session.permanent = True
 
 
-def backend_api_request(path, method="GET", token="", body=None, query=None):
+def backend_api_request(path, method="GET", token="", body=None, query=None, rate_limit_retries=0):
     if not backend_mode_enabled():
         raise RuntimeError("Backend API nao configurada")
 
@@ -756,29 +757,38 @@ def backend_api_request(path, method="GET", token="", body=None, query=None):
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
-    req = urllib_request.Request(url, data=payload, headers=headers, method=method.upper())
-    try:
-        with urllib_request.urlopen(req, timeout=15) as response:
-            raw = response.read().decode("utf-8")
-            return json.loads(raw) if raw else {}
-    except urllib_error.HTTPError as exc:
-        raw = exc.read().decode("utf-8", errors="ignore")
-        detail = ""
-        if raw:
-            try:
-                parsed = json.loads(raw)
-                detail = parsed.get("detail") if isinstance(parsed, dict) else raw
-            except json.JSONDecodeError:
-                detail = raw
-        if exc.code == 401 and token:
-            raise BackendAuthError(detail or "Token invalido") from exc
-        if exc.code == 429:
-            raise BackendRateLimitError(
-                "Muitas tentativas em pouco tempo. Aguarde cerca de 1 minuto e tente entrar novamente."
-            ) from exc
-        raise ValueError(detail or f"Erro HTTP {exc.code}") from exc
-    except urllib_error.URLError as exc:
-        raise ConnectionError("Nao foi possivel conectar ao backend.") from exc
+    for attempt in range(rate_limit_retries + 1):
+        req = urllib_request.Request(url, data=payload, headers=headers, method=method.upper())
+        try:
+            with urllib_request.urlopen(req, timeout=15) as response:
+                raw = response.read().decode("utf-8")
+                return json.loads(raw) if raw else {}
+        except urllib_error.HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="ignore")
+            detail = ""
+            if raw:
+                try:
+                    parsed = json.loads(raw)
+                    detail = parsed.get("detail") if isinstance(parsed, dict) else raw
+                except json.JSONDecodeError:
+                    detail = raw
+            if exc.code == 401 and token:
+                raise BackendAuthError(detail or "Token invalido") from exc
+            if exc.code == 429:
+                if attempt < rate_limit_retries:
+                    retry_after = exc.headers.get("Retry-After") if exc.headers else ""
+                    try:
+                        wait_seconds = min(max(int(float(retry_after)), 2), 8)
+                    except (TypeError, ValueError):
+                        wait_seconds = 2 + attempt * 2
+                    time.sleep(wait_seconds)
+                    continue
+                raise BackendRateLimitError(
+                    "O servidor limitou temporariamente o acesso. Aguarde alguns segundos e tente novamente."
+                ) from exc
+            raise ValueError(detail or f"Erro HTTP {exc.code}") from exc
+        except urllib_error.URLError as exc:
+            raise ConnectionError("Nao foi possivel conectar ao backend.") from exc
 
 
 def refresh_backend_me():
@@ -1811,6 +1821,7 @@ def login():
                     "/auth/login",
                     method="POST",
                     body={"username": usuario, "password": senha},
+                    rate_limit_retries=2,
                 )
                 session["api_token"] = payload["access_token"]
                 update_backend_session_user(payload["user"])
@@ -1872,6 +1883,7 @@ def cadastro():
                     "/auth/register",
                     method="POST",
                     body={"username": usuario, "email": email, "password": senha},
+                    rate_limit_retries=2,
                 )
                 session["api_token"] = payload["access_token"]
                 update_backend_session_user(payload["user"])
