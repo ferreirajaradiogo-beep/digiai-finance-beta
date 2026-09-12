@@ -4,42 +4,47 @@
 <section class="legal-hero-card">
     <span class="eyebrow">Legal</span>
     <h2>Politica de Privacidade</h2>
-    <p>Esta politica explica, de forma objetiva, como a beta publica do {{ app_display_name }} coleta, usa e protege os dados dos usuarios durante esta fase de testes.</p>
+    <p>Esta politica explica, de forma objetiva, como o {{ app_display_name }} coleta, usa, armazena e protege os dados dos usuarios durante a beta publica gratuita.</p>
 </section>
 
 <section class="legal-card-stack">
     <article class="bank-card legal-card">
         <h3>1. Quais dados sao coletados</h3>
-        <p>Podemos coletar os dados informados no cadastro, as configuracoes escolhidas dentro do sistema e os lancamentos financeiros registrados pelo usuario durante o uso da beta.</p>
+        <p>Coletamos os dados informados no cadastro, como usuario, e-mail e senha protegida por hash, alem das configuracoes escolhidas no sistema, contas, categorias, lancamentos financeiros e registros necessarios para sincronizacao entre app e site.</p>
     </article>
 
     <article class="bank-card legal-card">
         <h3>2. Para que os dados sao usados</h3>
-        <p>Os dados sao utilizados para permitir o login, manter o funcionamento da conta, salvar informacoes online, gerar relatorios, produzir backups e melhorar o produto com base no uso real desta fase beta.</p>
+        <p>Os dados sao usados para permitir login, manter a conta online, sincronizar app e site, gerar paineis e relatorios, executar acoes confirmadas pelo assistente, produzir backups e melhorar a estabilidade do produto durante a beta.</p>
     </article>
 
     <article class="bank-card legal-card">
         <h3>3. Armazenamento e seguranca</h3>
-        <p>Os dados da beta podem ser armazenados em servidor online do projeto. Adotamos medidas razoaveis de seguranca, como protecao de acesso e cuidado com senhas, mas a versao beta ainda esta em validacao e pode passar por ajustes tecnicos.</p>
+        <p>Os dados online sao armazenados em infraestrutura de nuvem usada pelo projeto, incluindo servidor de aplicacao e banco PostgreSQL. Adotamos medidas razoaveis de seguranca, como conexao protegida, controle de acesso e senhas nao armazenadas em texto puro. Ainda assim, a beta esta em evolucao e pode passar por ajustes tecnicos.</p>
     </article>
 
     <article class="bank-card legal-card">
         <h3>4. Compartilhamento com terceiros</h3>
-        <p>Os dados nao sao vendidos. Eles podem ser tratados apenas por servicos tecnicos necessarios para hospedagem, banco de dados, infraestrutura e operacao da plataforma beta.</p>
+        <p>Os dados nao sao vendidos. Eles podem ser processados apenas por servicos tecnicos necessarios para hospedagem, banco de dados, e-mail, inteligencia artificial, infraestrutura, seguranca e operacao da plataforma.</p>
     </article>
 
     <article class="bank-card legal-card">
         <h3>5. Direitos do usuario</h3>
-        <p>O usuario pode solicitar esclarecimentos, atualizacao de dados ou exclusao da conta beta entrando em contato pelo e-mail <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
+        <p>O usuario pode solicitar esclarecimentos, correcao de dados, exportacao basica ou exclusao da conta beta entrando em contato pelo e-mail <a href="mailto:{{ support_email }}">{{ support_email }}</a>. Algumas solicitacoes podem exigir confirmacao de identidade para proteger a conta.</p>
     </article>
 
     <article class="bank-card legal-card">
-        <h3>6. Atualizacoes desta politica</h3>
-        <p>Como esta e uma versao beta, esta politica pode ser atualizada para refletir melhorias no produto, ajustes operacionais ou novas etapas da publicacao.</p>
+        <h3>6. Dados locais e sincronizacao</h3>
+        <p>O app pode manter dados locais no aparelho para permitir uso e protecao contra falhas temporarias de conexao. Quando a conta esta online, o sistema tenta sincronizar automaticamente com o servidor. Em caso de token invalido ou troca de aparelho, pode ser necessario sair e entrar novamente.</p>
     </article>
 
     <article class="bank-card legal-card">
-        <h3>7. Contato</h3>
+        <h3>7. Atualizacoes desta politica</h3>
+        <p>Como esta e uma versao beta, esta politica pode ser atualizada para refletir melhorias no produto, ajustes operacionais, mudancas de infraestrutura ou novas etapas de publicacao.</p>
+    </article>
+
+    <article class="bank-card legal-card">
+        <h3>8. Contato</h3>
         <p>Responsavel por esta beta: {{ company_name }}. Para suporte, duvidas ou solicitacoes relacionadas a privacidade, use o e-mail <a href="mailto:{{ support_email }}">{{ support_email }}</a>.</p>
     </article>
  </section>

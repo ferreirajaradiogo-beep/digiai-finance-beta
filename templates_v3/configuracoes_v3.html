@@ -48,7 +48,7 @@
             <a href="{{ url_for('assistente_financeiro') }}" class="profile-shortcut">Abrir assistente</a>
             <a href="{{ url_for('index') }}#relatorios" class="profile-shortcut">Ver relatorios</a>
             <a href="{{ url_for('backup_download') }}" class="profile-shortcut">Backup na nuvem</a>
-            <a href="mailto:{{ support_email }}" class="profile-shortcut">Enviar duvida operacional</a>
+            <a href="mailto:{{ support_email }}?subject=Suporte%20{{ app_display_name|urlencode }}" class="profile-shortcut">Enviar duvida ao suporte</a>
             <a href="{{ url_for('logout') }}" class="profile-shortcut danger">Sair da conta</a>
         </div>
     </article>
