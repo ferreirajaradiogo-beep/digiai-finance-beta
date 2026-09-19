@@ -1,0 +1,110 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="landing-shell">
+    <div class="landing-hero">
+        <div class="landing-copy">
+            <span class="eyebrow">{{ company_name }} apresenta</span>
+            <h1>{{ app_display_name }}</h1>
+            <p class="landing-lead">
+                Um controle financeiro gratuito para organizar receitas, despesas, categorias,
+                contas, relatorios e suporte inteligente em uma experiencia integrada entre app e site.
+            </p>
+            <div class="landing-actions">
+                <a class="landing-button primary" href="{{ url_for('cadastro') }}">Criar conta gratuita</a>
+                <a class="landing-button" href="{{ apk_url }}">Baixar APK Android</a>
+            </div>
+            <div class="landing-trust-strip">
+                <span>App + site sincronizados</span>
+                <span>Assistente financeiro</span>
+                <span>Beta gratuita</span>
+            </div>
+        </div>
+
+        <div class="landing-device-card" aria-label="Previa do painel financeiro">
+            <div class="landing-phone-frame">
+                <div class="landing-phone-top">
+                    <img src="{{ url_for('static', filename='icons/app-logo.png') }}" alt="Logo {{ app_display_name }}">
+                    <div>
+                        <span>Dig.ai</span>
+                        <strong>Financas</strong>
+                    </div>
+                </div>
+                <div class="landing-balance-card">
+                    <span>Saldo atual</span>
+                    <strong>R$ 319,17</strong>
+                    <small>Dados sincronizados com seguranca.</small>
+                </div>
+                <div class="landing-mini-grid">
+                    <div><span>Receitas</span><strong>R$ 2.464,82</strong></div>
+                    <div><span>Despesas</span><strong>R$ 2.145,65</strong></div>
+                </div>
+                <div class="landing-chat-bubble">"Qual categoria mais pesou este mes?"</div>
+            </div>
+        </div>
+    </div>
+
+    <section class="landing-section">
+        <div class="landing-section-head">
+            <span class="eyebrow">Operacao diaria</span>
+            <h2>Feito para usar sem complicar</h2>
+            <p>O objetivo e deixar a rotina financeira mais clara, com menos planilha solta e mais acao pratica.</p>
+        </div>
+        <div class="landing-feature-grid">
+            <article class="landing-feature-card">
+                <span>01</span>
+                <h3>Lancamentos organizados</h3>
+                <p>Cadastre receitas e despesas por conta, categoria, periodo e vencimento.</p>
+            </article>
+            <article class="landing-feature-card">
+                <span>02</span>
+                <h3>Sincronizacao online</h3>
+                <p>Use a mesma conta no app e no site para manter os dados alinhados.</p>
+            </article>
+            <article class="landing-feature-card">
+                <span>03</span>
+                <h3>Assistente inteligente</h3>
+                <p>Pergunte sobre seu mes, tire duvidas e execute acoes confirmadas quando disponivel.</p>
+            </article>
+            <article class="landing-feature-card">
+                <span>04</span>
+                <h3>Exportacao e backup</h3>
+                <p>Gere PDF, CSV e backup para acompanhar a evolucao com mais seguranca.</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="landing-section landing-two-column">
+        <div class="landing-info-card">
+            <span class="eyebrow">Como testar</span>
+            <h2>Comece pelo app ou pelo site</h2>
+            <ol class="landing-steps">
+                <li>Crie sua conta gratuita no site.</li>
+                <li>Baixe o APK Android e entre com o mesmo usuario.</li>
+                <li>Mantenha a API oficial em {{ api_url }}.</li>
+                <li>Use o painel, os lancamentos e o assistente para validar a beta.</li>
+            </ol>
+        </div>
+        <div class="landing-info-card muted">
+            <span class="eyebrow">Links rapidos</span>
+            <h2>Acesso e suporte</h2>
+            <div class="landing-link-list">
+                <a href="{{ url_for('login') }}">Abrir app web</a>
+                <a href="{{ apk_url }}">Baixar APK Android</a>
+                <a href="{{ url_for('politica_privacidade') }}">Politica de privacidade</a>
+                <a href="{{ url_for('termos_de_uso') }}">Termos de uso</a>
+                <a href="mailto:{{ support_email }}?subject=Suporte%20{{ app_display_name|urlencode }}">Falar com suporte</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="landing-final-cta">
+        <div>
+            <span class="eyebrow">Linha Dig.ai</span>
+            <h2>Uma base gratuita para organizar sua vida financeira.</h2>
+            <p>{{ company_name }} desenvolve solucoes simples, inteligentes e praticas para operacao do dia a dia.</p>
+        </div>
+        <a class="landing-button primary" href="{{ url_for('cadastro') }}">Entrar na beta gratuita</a>
+    </section>
+</section>
+{% endblock %}

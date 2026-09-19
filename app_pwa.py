@@ -55,6 +55,10 @@ PUBLIC_BETA_MODE = True
 DB_PATH = Path(os.environ.get("NOTAFACIL_DB_PATH", str(BASE_DIR / "financeiro_beta.db"))).expanduser()
 BACKUP_DIR = Path(os.environ.get("NOTAFACIL_BACKUP_DIR", str(BASE_DIR / "backups"))).expanduser()
 BACKEND_API_URL = (os.environ.get("NOTAFACIL_BACKEND_URL", "") or "").strip().rstrip("/")
+DIGAI_APK_URL = os.environ.get(
+    "DIGAI_APK_URL",
+    "https://expo.dev/artifacts/eas/MORXEJT_6XPj9YGobuqMMk-ws847uz-x6urKuJDShdY.apk",
+).strip()
 
 DEFAULT_SETTINGS = {"idioma": "pt-BR", "moeda": "BRL", "tema": "black-ocean", "plano": "free"}
 FREE_ALLOWED_COLORS = ["#58d5ff", "#7cf0bb", "#ffab7a", "#ff7c93"]
@@ -2825,6 +2829,19 @@ def politica_privacidade():
 @app.route("/termos-de-uso")
 def termos_de_uso():
     return render_template("termos_v3.html")
+
+
+@app.route("/divulgacao")
+@app.route("/landing")
+def divulgacao():
+    web_url = request.url_root.rstrip("/")
+    api_url = BACKEND_API_URL or "https://notafacil-api.onrender.com"
+    return render_template(
+        "divulgacao_v3.html",
+        web_url=web_url,
+        api_url=api_url,
+        apk_url=DIGAI_APK_URL,
+    )
 
 
 @app.route("/health")
