@@ -30,7 +30,7 @@
 
     <article class="bank-card legal-card">
         <h3>5. Direitos do usuario</h3>
-        <p>O usuario pode solicitar esclarecimentos, correcao de dados, exportacao basica ou exclusao da conta beta entrando em contato pelo e-mail <a href="mailto:{{ support_email }}">{{ support_email }}</a>. Algumas solicitacoes podem exigir confirmacao de identidade para proteger a conta.</p>
+        <p>O usuario pode solicitar esclarecimentos, correcao ou exportacao de dados. Para excluir a conta e os dados associados, use a opcao <a href="{{ url_for('excluir_dados_usuario') }}">Excluir conta e dados</a>, disponivel no app e nesta pagina. Se nao conseguir acessar a conta, solicite a exclusao pelo e-mail <a href="mailto:{{ support_email }}?subject=Exclusao%20de%20conta%20{{ app_display_name|urlencode }}">{{ support_email }}</a>; poderemos confirmar a titularidade antes de concluir o pedido.</p>
     </article>
 
     <article class="bank-card legal-card">

@@ -1,0 +1,10 @@
+{% extends "base_v3.html" %}
+
+{% block content %}
+<section class="legal-hero-card">
+    <span class="eyebrow">Solicitacao concluida</span>
+    <h2>Conta e dados excluidos</h2>
+    <p>A conta do {{ app_display_name }} e os dados associados armazenados pelo servico foram removidos. Os arquivos que voce baixou ou salvou fora do servico nao sao afetados.</p>
+    <a class="bank-primary-button" href="{{ url_for('divulgacao') }}">Voltar para a pagina inicial</a>
+</section>
+{% endblock %}

@@ -1,5 +1,7 @@
 import json
+import hmac
 import os
+import secrets
 from csv import writer as csv_writer
 from collections import Counter
 from datetime import date, timedelta
@@ -1823,8 +1825,11 @@ criar_tabelas()
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    next_url = request.values.get("next", "")
+    if not next_url.startswith("/") or next_url.startswith("//") or "\\" in next_url:
+        next_url = url_for("index")
     if "user" in session:
-        return redirect(url_for("index"))
+        return redirect(next_url)
 
     error = None
     if request.method == "POST":
@@ -1844,7 +1849,7 @@ def login():
                 session["api_token"] = payload["access_token"]
                 update_backend_session_user(payload["user"])
                 get_backend_snapshot(force=True)
-                return redirect(url_for("index"))
+                return redirect(next_url)
             except ValueError as exc:
                 error = str(exc) or TRANSLATIONS["pt-BR"]["wrong_password"]
             except BackendRateLimitError as exc:
@@ -1865,7 +1870,7 @@ def login():
                 session.permanent = True
                 ensure_user_settings(usuario)
                 ensure_default_categories_and_accounts(usuario)
-                return redirect(url_for("index"))
+                return redirect(next_url)
             error = TRANSLATIONS["pt-BR"]["wrong_password"]
             conn.close()
         else:
@@ -1945,6 +1950,45 @@ def cadastro():
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
+
+@app.route("/excluir-conta", methods=["GET", "POST"])
+def excluir_dados_usuario():
+    user = session.get("user")
+    if request.method == "POST":
+        if not user:
+            return redirect(url_for("login", next=url_for("excluir_dados_usuario")))
+        csrf_token = session.get("account_delete_csrf", "")
+        submitted_token = request.form.get("csrf_token", "")
+        if not csrf_token or not hmac.compare_digest(csrf_token, submitted_token):
+            flash("A sessao expirou. Atualize a pagina e tente novamente.", "warning")
+            return redirect(url_for("excluir_dados_usuario"))
+        if request.form.get("confirmacao", "").strip().upper() != "EXCLUIR":
+            flash("Digite EXCLUIR para confirmar a remocao permanente da conta.", "warning")
+            return redirect(url_for("excluir_dados_usuario"))
+
+        try:
+            if backend_mode_enabled():
+                backend_api_request("/me", method="DELETE", token=get_backend_token())
+            else:
+                conn = conectar()
+                c = conn.cursor()
+                for table in ("movimentacoes", "categorias", "contas", "configuracoes", "usuarios"):
+                    c.execute(f"DELETE FROM {table} WHERE usuario=?", (user,))
+                conn.commit()
+                conn.close()
+        except BackendAuthError:
+            clear_backend_session()
+            return redirect(url_for("login"))
+        except (BackendRateLimitError, ConnectionError, ValueError) as exc:
+            flash(str(exc) or "Nao foi possivel excluir a conta agora. Tente novamente mais tarde.", "warning")
+            return redirect(url_for("excluir_dados_usuario"))
+
+        session.clear()
+        return render_template("exclusao_conta_concluida_v3.html")
+
+    session.setdefault("account_delete_csrf", secrets.token_urlsafe(32))
+    return render_template("excluir_conta_v3.html", account_username=user)
 
 
 @app.route("/atualizar-dados")
