@@ -1751,11 +1751,25 @@ def write_local_backup(usuario):
 @app.context_processor
 def inject_layout_context():
     user = session.get("user")
-    settings = get_settings(user) if user else DEFAULT_SETTINGS.copy()
+    backend_user = backend_user_from_session() if user else {}
+    public_content_endpoint = request.endpoint in {
+        "divulgacao",
+        "politica_privacidade",
+        "termos_de_uso",
+    }
+    if user and backend_mode_enabled() and public_content_endpoint:
+        settings = {
+            "idioma": backend_user.get("language", DEFAULT_SETTINGS["idioma"]),
+            "moeda": backend_user.get("currency", DEFAULT_SETTINGS["moeda"]),
+            "tema": backend_user.get("theme_key", DEFAULT_SETTINGS["tema"]),
+            "plano": backend_user.get("plan", "free"),
+            "alerta_limite": float(backend_user.get("monthly_limit") or 0),
+        }
+    else:
+        settings = get_settings(user) if user else DEFAULT_SETTINGS.copy()
     texts = get_texts(settings["idioma"])
     active_plan_key = get_plan_key(user) if user else "free"
     effective_beta_mode = PUBLIC_BETA_MODE and not backend_mode_enabled()
-    backend_user = backend_user_from_session() if user else {}
     account_email = backend_user.get("email", "") if isinstance(backend_user, dict) else ""
     account_is_online = bool(user and backend_mode_enabled() and get_backend_token())
     settings["plano"] = active_plan_key
