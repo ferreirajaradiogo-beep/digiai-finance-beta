@@ -800,6 +800,9 @@ def refresh_backend_me():
     except ConnectionError:
         mark_backend_unavailable()
         return backend_user_from_session()
+    except BackendRateLimitError as exc:
+        mark_backend_unavailable(str(exc))
+        return backend_user_from_session()
     except BackendAuthError:
         raise
     except ValueError as exc:
@@ -818,6 +821,9 @@ def get_backend_snapshot(force=False):
             store_backend_snapshot(g.backend_snapshot)
         except ConnectionError:
             mark_backend_unavailable()
+            g.backend_snapshot = backend_snapshot_from_session()
+        except BackendRateLimitError as exc:
+            mark_backend_unavailable(str(exc))
             g.backend_snapshot = backend_snapshot_from_session()
         except BackendAuthError:
             raise
